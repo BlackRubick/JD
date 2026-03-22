@@ -1,0 +1,84 @@
+import { Route, Routes } from 'react-router-dom';
+import HomePage from '../pages/HomePage';
+import LoginPage from '../pages/LoginPage';
+import RegisterPage from '../pages/RegisterPage';
+import TestPage from '../pages/TestPage';
+import DashboardPage from '../pages/DashboardPage';
+import ResourcesPage from '../pages/ResourcesPage';
+import QuestionAdminPage from '../pages/QuestionAdminPage';
+import PatientsPage from '../pages/PatientsPage';
+import PatientTestsPage from '../pages/PatientTestsPage';
+import MyTestsPage from '../pages/MyTestsPage';
+import CreateDoctorPage from '../pages/CreateDoctorPage';
+import PrivacyPolicyPage from '../pages/PrivacyPolicyPage';
+import { AuthRoute, TherapistRoute } from './Guards';
+
+function AppRoutes({ role, onLogin, onLogout }) {
+  return (
+    <Routes>
+      <Route path="/" element={<HomePage role={role} onLogout={onLogout} />} />
+      <Route path="/login" element={<LoginPage role={role} onLogin={onLogin} />} />
+      <Route path="/register" element={<RegisterPage role={role} onLogin={onLogin} />} />
+      <Route
+        path="/test"
+        element={(
+          <AuthRoute role={role}>
+            <TestPage role={role} onLogout={onLogout} />
+          </AuthRoute>
+        )}
+      />
+      <Route
+        path="/my-tests"
+        element={(
+          <AuthRoute role={role}>
+            <MyTestsPage role={role} onLogout={onLogout} />
+          </AuthRoute>
+        )}
+      />
+      <Route
+        path="/dashboard"
+        element={(
+          <TherapistRoute role={role}>
+            <DashboardPage role={role} onLogout={onLogout} />
+          </TherapistRoute>
+        )}
+      />
+      <Route
+        path="/patients"
+        element={(
+          <TherapistRoute role={role}>
+            <PatientsPage role={role} onLogout={onLogout} />
+          </TherapistRoute>
+        )}
+      />
+      <Route
+        path="/patient/:patientId/tests"
+        element={(
+          <TherapistRoute role={role}>
+            <PatientTestsPage role={role} onLogout={onLogout} />
+          </TherapistRoute>
+        )}
+      />
+      <Route
+        path="/admin/questions"
+        element={(
+          <TherapistRoute role={role}>
+            <QuestionAdminPage role={role} onLogout={onLogout} />
+          </TherapistRoute>
+        )}
+      />
+      <Route
+        path="/admin/create-doctor"
+        element={(
+          <TherapistRoute role={role}>
+            <CreateDoctorPage role={role} onLogout={onLogout} />
+          </TherapistRoute>
+        )}
+      />
+      <Route path="/privacy" element={<PrivacyPolicyPage role={role} onLogout={onLogout} />} />
+      <Route path="/resources" element={<ResourcesPage role={role} onLogout={onLogout} />} />
+    </Routes>
+  );
+}
+
+export default AppRoutes;
