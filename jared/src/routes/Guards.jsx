@@ -6,6 +6,10 @@ export function TherapistRoute({ role, children }) {
   return role === 'therapist' ? children : <Navigate to="/" replace />;
 }
 
+export function PatientRoute({ role, children }) {
+  return role === 'patient' ? children : <Navigate to="/" replace />;
+}
+
 export function AuthRoute({ role, children }) {
   useEffect(() => {
     if (!role) {

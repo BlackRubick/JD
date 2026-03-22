@@ -11,7 +11,7 @@ import PatientTestsPage from '../pages/PatientTestsPage';
 import MyTestsPage from '../pages/MyTestsPage';
 import CreateDoctorPage from '../pages/CreateDoctorPage';
 import PrivacyPolicyPage from '../pages/PrivacyPolicyPage';
-import { AuthRoute, TherapistRoute } from './Guards';
+import { AuthRoute, TherapistRoute, PatientRoute } from './Guards';
 
 function AppRoutes({ role, onLogin, onLogout }) {
   return (
@@ -23,7 +23,9 @@ function AppRoutes({ role, onLogin, onLogout }) {
         path="/test"
         element={(
           <AuthRoute role={role}>
-            <TestPage role={role} onLogout={onLogout} />
+            <PatientRoute role={role}>
+              <TestPage role={role} onLogout={onLogout} />
+            </PatientRoute>
           </AuthRoute>
         )}
       />
@@ -31,7 +33,9 @@ function AppRoutes({ role, onLogin, onLogout }) {
         path="/my-tests"
         element={(
           <AuthRoute role={role}>
-            <MyTestsPage role={role} onLogout={onLogout} />
+            <PatientRoute role={role}>
+              <MyTestsPage role={role} onLogout={onLogout} />
+            </PatientRoute>
           </AuthRoute>
         )}
       />

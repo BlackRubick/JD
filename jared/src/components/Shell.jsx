@@ -35,7 +35,9 @@ function Shell({ children, role, onLogout }) {
 
           <nav style={{ display: 'flex', gap: 28, alignItems: 'center' }}>
             <Link to="/" className="nav-link">Inicio</Link>
-            <Link to="/test" className="nav-link">Evaluación</Link>
+            {role !== 'therapist' && (
+              <Link to="/test" className="nav-link">Evaluación</Link>
+            )}
             {role === 'patient' && (
               <Link to="/my-tests" className="nav-link">Mis Tests</Link>
             )}
