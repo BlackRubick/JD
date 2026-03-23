@@ -181,8 +181,9 @@ function HomePage({ role, onLogout }) {
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 20, marginBottom: 32 }}>
             {[
               { name: 'CES-D', desc: 'Escala de depresión del Centro de Estudios Epidemiológicos', icon: '🧩', color: '#2563eb' },
-              { name: 'GAD-7', desc: 'Escala de trastorno de ansiedad generalizada', icon: '💡', color: '#7c3aed' },
               { name: 'PSS', desc: 'Escala de estrés percibido', icon: '⚡', color: '#0891b2' },
+              { name: 'IDARE', desc: 'Inventario de Ansiedad Estado-Rasgo', icon: '📝', color: '#f59e42' },
+              { name: 'BSS', desc: 'Escala de desesperanza de Beck', icon: '🕊️', color: '#10b981' },
             ].map((t) => (
               <div key={t.name} className="card" style={{ padding: '24px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>

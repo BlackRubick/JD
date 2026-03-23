@@ -114,7 +114,15 @@ function RegisterPage({ onLogin }) {
         </div>
         <label style={{ display: 'flex', alignItems: 'flex-start', gap: 10, fontSize: '0.8rem', color: '#475569', cursor: 'pointer' }}>
           <input type="checkbox" required style={{ marginTop: 2, accentColor: 'var(--blue2)' }} />
-          <span>Acepto los <span style={{ color: 'var(--blue2)', fontWeight: 600 }}>términos y condiciones</span> y el aviso de privacidad</span>
+          <span>
+            Acepto los{' '}
+            <Link to="/privacy" style={{ color: 'var(--blue2)', fontWeight: 600, textDecoration: 'underline', cursor: 'pointer' }}>
+              términos y condiciones
+            </Link>{' '}y el{' '}
+            <Link to="/privacy" style={{ color: 'var(--blue2)', fontWeight: 600, textDecoration: 'underline', cursor: 'pointer' }}>
+              aviso de privacidad
+            </Link>
+          </span>
         </label>
         <button type="submit" className="btn-primary" style={{ width: '100%', padding: '14px', marginTop: 4 }} disabled={loading}>
           {loading ? 'Creando cuenta...' : 'Crear cuenta'}
