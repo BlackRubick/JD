@@ -11,6 +11,15 @@ function ResourcesPage({ role, onLogout }) {
   return (
     <Shell role={role} onLogout={onLogout}>
       <InnerPage title="Recursos de apoyo" subtitle="Contenido psicoeducativo y rutas de ayuda" icon="">
+        <div style={{ marginBottom: 24, background: '#f1f5f9', borderRadius: 10, padding: 16, border: '1px solid #e2e8f0' }}>
+          <h3 style={{ margin: 0, fontSize: '1.1rem', color: 'var(--navy)' }}>Tipos de test aplicados</h3>
+          <ul style={{ margin: '8px 0 0 0', paddingLeft: 20, color: 'var(--muted)', fontSize: '0.98rem' }}>
+            <li><b>CES-D</b> (Depresión)</li>
+            <li><b>PSS</b> (Estrés Percibido)</li>
+            <li><b>IDARE</b> (Ansiedad Estado-Rasgo)</li>
+            <li><b>BSS</b> (Ideación Suicida)</li>
+          </ul>
+        </div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 20 }}>
           {resources.map((r) => (
             <div key={r.title} style={{
