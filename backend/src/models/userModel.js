@@ -38,5 +38,13 @@ export const userModel = {
       'SELECT id, name, email, created_at FROM users WHERE role = "doctor" ORDER BY created_at DESC'
     );
     return rows;
+  },
+
+  // Soft delete: marca la cuenta como eliminada y guarda fecha de eliminación
+  async softDelete(id) {
+    await pool.execute(
+      'UPDATE users SET deleted_at = NOW() WHERE id = ?',
+      [id]
+    );
   }
 };

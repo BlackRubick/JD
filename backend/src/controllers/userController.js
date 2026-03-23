@@ -49,5 +49,17 @@ export const userController = {
       console.error('Error al obtener doctores:', error);
       res.status(500).json({ error: 'Error al obtener doctores' });
     }
+  },
+
+  // Soft delete: marca la cuenta como eliminada y guarda fecha de eliminación
+  async deleteOwnAccount(req, res) {
+    try {
+      const userId = req.user.id;
+      await userModel.softDelete(userId);
+      res.json({ message: 'Cuenta marcada para eliminación. Puedes recuperarla en los próximos 60 días iniciando sesión.' });
+    } catch (error) {
+      console.error('Error al eliminar cuenta:', error);
+      res.status(500).json({ error: 'Error al eliminar cuenta' });
+    }
   }
 };

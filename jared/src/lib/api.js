@@ -73,6 +73,10 @@ export const userAPI = {
 
   async getAllDoctors() {
     return apiRequest('/users/doctors');
+  },
+
+  async deleteMe() {
+    return apiRequest('/users/me', { method: 'DELETE' });
   }
 };
 
