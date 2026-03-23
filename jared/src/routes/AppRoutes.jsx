@@ -11,6 +11,7 @@ import PatientTestsPage from '../pages/PatientTestsPage';
 import MyTestsPage from '../pages/MyTestsPage';
 import CreateDoctorPage from '../pages/CreateDoctorPage';
 import PrivacyPolicyPage from '../pages/PrivacyPolicyPage';
+import DeleteAccountPage from '../pages/DeleteAccountPage';
 import { AuthRoute, TherapistRoute, PatientRoute } from './Guards';
 
 function AppRoutes({ role, onLogin, onLogout }) {
@@ -19,6 +20,7 @@ function AppRoutes({ role, onLogin, onLogout }) {
       <Route path="/" element={<HomePage role={role} onLogout={onLogout} />} />
       <Route path="/login" element={<LoginPage role={role} onLogin={onLogin} />} />
       <Route path="/register" element={<RegisterPage role={role} onLogin={onLogin} />} />
+      <Route path="/delete-account" element={<DeleteAccountPage />} />
       <Route
         path="/test"
         element={(

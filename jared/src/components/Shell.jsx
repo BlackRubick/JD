@@ -66,6 +66,15 @@ function Shell({ children, role, onLogout }) {
                 <button className="btn-ghost" onClick={onLogout} style={{ padding: '8px 16px', fontSize: '0.8rem' }}>
                   Salir
                 </button>
+                {role === 'patient' && (
+                  <Link
+                    to="/delete-account"
+                    style={{ color: '#ef4444', fontWeight: 600, fontSize: '0.8rem', marginLeft: 8, textDecoration: 'underline', cursor: 'pointer' }}
+                    title="Eliminar cuenta"
+                  >
+                    Eliminar cuenta
+                  </Link>
+                )}
               </>
             ) : (
               <Link to="/login" className="btn-primary" style={{ padding: '9px 20px', fontSize: '0.85rem' }}>
