@@ -5,12 +5,7 @@ import Shell from '../components/Shell';
 import InnerPage from '../components/InnerPage';
 import { questionAPI, testAPI } from '../lib/api';
 
-const RESPONSE_OPTIONS = [
-  { value: 0, label: 'Raramente o nunca (menos de 1 día)' },
-  { value: 1, label: 'Algunas veces o pocas veces (1-2 días)' },
-  { value: 2, label: 'Ocasionalmente o moderadamente (3-4 días)' },
-  { value: 3, label: 'La mayor parte del tiempo (5-7 días)' }
-];
+
 
 function TestPage({ role, onLogout }) {
   const navigate = useNavigate();
@@ -210,7 +205,7 @@ function TestPage({ role, onLogout }) {
             </h3>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-              {RESPONSE_OPTIONS.map(option => (
+              {(question.options || []).map(option => (
                 <label
                   key={option.value}
                   style={{

@@ -2,10 +2,31 @@ import pool from '../config/database.js';
 
 export const questionModel = {
   async getAll() {
-    const [rows] = await pool.execute(
+    // Obtener todas las preguntas activas
+    const [questions] = await pool.execute(
       'SELECT * FROM questions WHERE is_active = TRUE ORDER BY position, id'
     );
-    return rows;
+    // Obtener todas las opciones de respuesta asociadas
+    const [options] = await pool.execute(
+      'SELECT * FROM answer_options ORDER BY question_id, position, id'
+    );
+    // Mapear opciones a cada pregunta
+    const optionsByQuestion = {};
+    for (const opt of options) {
+      if (!optionsByQuestion[opt.question_id]) optionsByQuestion[opt.question_id] = [];
+      optionsByQuestion[opt.question_id].push({
+        id: opt.id,
+        label: opt.label,
+        value: opt.value,
+        score: opt.score,
+        position: opt.position
+      });
+    }
+    // Añadir las opciones a cada pregunta
+    return questions.map(q => ({
+      ...q,
+      options: optionsByQuestion[q.id] || []
+    }));
   },
 
   async findById(id) {
