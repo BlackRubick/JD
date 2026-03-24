@@ -4,8 +4,8 @@ import { userModel } from '../models/userModel.js';
 export const userController = {
   async getAllPatients(req, res) {
     try {
-      const patients = await userModel.getAllPatients();
-      res.json(patients);
+         const patients = await userModel.getAllPatients();
+         res.json(patients);
     } catch (error) {
       console.error('Error al obtener pacientes:', error);
       res.status(500).json({ error: 'Error al obtener pacientes' });
@@ -43,8 +43,8 @@ export const userController = {
 
   async getAllDoctors(req, res) {
     try {
-      const doctors = await userModel.getAllDoctors();
-      res.json(doctors);
+         const doctors = await userModel.getAllDoctors();
+         res.json(doctors);
     } catch (error) {
       console.error('Error al obtener doctores:', error);
       res.status(500).json({ error: 'Error al obtener doctores' });

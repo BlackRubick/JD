@@ -19,12 +19,12 @@ export const testController = {
         });
       }
 
-      const pendingFeedback = await testModel.getCompletedSessionWithoutFeedback(patient_id);
-      if (pendingFeedback) {
-        return res.status(409).json({
-          error: 'Debes esperar la retroalimentación de tu último test antes de iniciar uno nuevo.'
-        });
-      }
+         const pendingFeedback = await testModel.getCompletedSessionWithoutFeedback(patient_id);
+         if (pendingFeedback) {
+           return res.status(409).json({
+             error: 'Debes esperar la retroalimentación de tu último test antes de iniciar uno nuevo.'
+           });
+         }
 
       const sessionId = await testModel.createSession(patient_id, assigned_by);
       res.status(201).json({
@@ -117,11 +117,11 @@ export const testController = {
       const responses = await testModel.getSessionResponses(session_id);
       const feedback = await testModel.getFeedback(session_id);
 
-      res.json({
-        session,
-        responses,
-        feedback
-      });
+         res.json({
+           session,
+           responses,
+           feedback
+         });
     } catch (error) {
       console.error('Error al obtener detalles:', error);
       res.status(500).json({ error: 'Error al obtener detalles de la sesión' });

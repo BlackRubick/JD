@@ -1,4 +1,6 @@
+
 import pool from '../config/database.js';
+import { encrypt, decrypt } from '../utils/crypto.js';
 
 export const testModel = {
   async getInProgressSessionByPatient(patient_id) {
@@ -26,8 +28,8 @@ export const testModel = {
 
   async createSession(patient_id, assigned_by = null) {
     const [result] = await pool.execute(
-      'INSERT INTO test_sessions (patient_id, assigned_by, status) VALUES (?, ?, "in_progress")',
-      [patient_id, assigned_by]
+      'INSERT INTO test_sessions (patient_id, assigned_by, status) VALUES (?, ?, ?)',
+      [patient_id, assigned_by, encrypt('in_progress')]
     );
     return result.insertId;
   },
@@ -35,14 +37,14 @@ export const testModel = {
   async saveResponse(test_session_id, question_id, response_value) {
     await pool.execute(
       'INSERT INTO test_responses (test_session_id, question_id, response_value) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE response_value = ?',
-      [test_session_id, question_id, response_value, response_value]
+      [test_session_id, question_id, encrypt(response_value), encrypt(response_value)]
     );
   },
 
   async completeSession(test_session_id, total_score) {
     await pool.execute(
-      'UPDATE test_sessions SET status = "completed", total_score = ?, completed_at = NOW() WHERE id = ?',
-      [total_score, test_session_id]
+      'UPDATE test_sessions SET status = ?, total_score = ?, completed_at = NOW() WHERE id = ?',
+      [encrypt('completed'), total_score, test_session_id]
     );
   },
 
@@ -51,7 +53,7 @@ export const testModel = {
       'SELECT * FROM test_sessions WHERE patient_id = ? ORDER BY created_at DESC',
       [patient_id]
     );
-    return rows;
+    return rows.map(this._decryptSession);
   },
 
   async getSessionById(session_id) {
@@ -59,7 +61,8 @@ export const testModel = {
       'SELECT * FROM test_sessions WHERE id = ?',
       [session_id]
     );
-    return rows[0];
+    if (!rows[0]) return undefined;
+    return this._decryptSession(rows[0]);
   },
 
   async getSessionResponses(session_id) {
@@ -71,7 +74,11 @@ export const testModel = {
        ORDER BY q.position, q.id`,
       [session_id]
     );
-    return rows;
+    return rows.map(r => ({
+      ...r,
+      response_value: r.response_value ? decrypt(r.response_value) : r.response_value,
+      question_text: r.question_text ? decrypt(r.question_text) : r.question_text
+    }));
   },
 
   async getAllSessionsWithPatients() {
@@ -81,7 +88,7 @@ export const testModel = {
        JOIN users u ON ts.patient_id = u.id
        ORDER BY ts.created_at DESC`
     );
-    return rows;
+    return rows.map(this._decryptSession);
   },
 
   async getFeedback(session_id) {
@@ -93,14 +100,26 @@ export const testModel = {
        ORDER BY f.created_at DESC`,
       [session_id]
     );
-    return rows;
+    return rows.map(r => ({
+      ...r,
+      feedback_text: r.feedback_text ? decrypt(r.feedback_text) : r.feedback_text,
+      doctor_name: r.doctor_name ? decrypt(r.doctor_name) : r.doctor_name
+    }));
   },
 
   async addFeedback(test_session_id, doctor_id, feedback_text) {
     const [result] = await pool.execute(
       'INSERT INTO feedback (test_session_id, doctor_id, feedback_text) VALUES (?, ?, ?)',
-      [test_session_id, doctor_id, feedback_text]
+      [test_session_id, doctor_id, encrypt(feedback_text)]
     );
     return result.insertId;
+  },
+
+  _decryptSession(session) {
+    return {
+      ...session,
+      status: session.status ? decrypt(session.status) : session.status,
+      // Si hay campos de texto, desencriptar aquí
+    };
   }
 };

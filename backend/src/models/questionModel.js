@@ -1,4 +1,6 @@
+
 import pool from '../config/database.js';
+import { encrypt, decrypt } from '../utils/crypto.js';
 
 export const questionModel = {
   async getAll() {
@@ -16,8 +18,8 @@ export const questionModel = {
       if (!optionsByQuestion[opt.question_id]) optionsByQuestion[opt.question_id] = [];
       optionsByQuestion[opt.question_id].push({
         id: opt.id,
-        label: opt.label,
-        value: opt.value,
+        label: opt.label ? decrypt(opt.label) : opt.label,
+        value: opt.value ? decrypt(opt.value) : opt.value,
         score: opt.score,
         position: opt.position
       });
@@ -25,6 +27,7 @@ export const questionModel = {
     // Añadir las opciones a cada pregunta
     return questions.map(q => ({
       ...q,
+      text: q.text ? decrypt(q.text) : q.text,
       options: optionsByQuestion[q.id] || []
     }));
   },
@@ -34,13 +37,25 @@ export const questionModel = {
       'SELECT * FROM questions WHERE id = ?',
       [id]
     );
-    return rows[0];
+    if (!rows[0]) return undefined;
+    return {
+      ...rows[0],
+      text: rows[0].text ? decrypt(rows[0].text) : rows[0].text
+    };
   },
 
   async create(text, position, created_by) {
     const [result] = await pool.execute(
       'INSERT INTO questions (text, position, created_by) VALUES (?, ?, ?)',
-      [text, position, created_by]
+      [encrypt(text), position, created_by]
+    );
+    return result.insertId;
+  },
+
+  async addAnswerOption(question_id, label, value, score, position) {
+    const [result] = await pool.execute(
+      'INSERT INTO answer_options (question_id, label, value, score, position) VALUES (?, ?, ?, ?, ?)',
+      [question_id, encrypt(label), encrypt(value), score, position]
     );
     return result.insertId;
   },
@@ -48,7 +63,7 @@ export const questionModel = {
   async update(id, text, position) {
     await pool.execute(
       'UPDATE questions SET text = ?, position = ? WHERE id = ?',
-      [text, position, id]
+      [encrypt(text), position, id]
     );
   },
 
