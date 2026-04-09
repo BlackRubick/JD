@@ -13,15 +13,27 @@ function safeDecrypt(value) {
   }
 }
 
+function normalizeEmail(email) {
+  return String(email || '').trim().toLowerCase();
+}
+
 export const userModel = {
 
   async findByEmail(email) {
-    const [rows] = await pool.execute(
-      'SELECT * FROM users WHERE email = ?',
-      [encrypt(email)]
+    const target = normalizeEmail(email);
+
+    // Camino principal: emails guardados en texto plano (esquema actual).
+    const [plainRows] = await pool.execute(
+      'SELECT * FROM users WHERE LOWER(TRIM(email)) = ? LIMIT 1',
+      [target]
     );
-    if (!rows[0]) return undefined;
-    return this._decryptUser(rows[0]);
+    if (plainRows[0]) return this._decryptUser(plainRows[0]);
+
+    // Compatibilidad: filas antiguas con email cifrado no deterministico.
+    const [rows] = await pool.execute('SELECT * FROM users');
+    const matched = rows.find((row) => normalizeEmail(safeDecrypt(row.email)) === target);
+    if (!matched) return undefined;
+    return this._decryptUser(matched);
   },
 
 
@@ -41,9 +53,9 @@ export const userModel = {
       'INSERT INTO users (name, email, password, role, date_of_birth, sex, created_by) VALUES (?, ?, ?, ?, ?, ?, ?)',
       [
         encrypt(name),
-        encrypt(email),
+        normalizeEmail(email),
         password, // la contraseña ya viene hasheada
-        encrypt(role ?? 'patient'),
+        role ?? 'patient',
         date_of_birth ? encrypt(date_of_birth) : null,
         sex ? encrypt(sex) : null,
         created_by ?? null
@@ -56,7 +68,7 @@ export const userModel = {
   async getAllPatients() {
     const [rows] = await pool.execute(
       'SELECT id, name, email, date_of_birth, sex, created_at, patient_status, patient_status_reason, deleted_at FROM users WHERE role = ?',
-      [encrypt('patient')]
+      ['patient']
     );
     return rows.map(this._decryptUser);
   },
@@ -65,7 +77,7 @@ export const userModel = {
   async getAllDoctors() {
     const [rows] = await pool.execute(
       'SELECT id, name, email, created_at FROM users WHERE role = ?',
-      [encrypt('doctor')]
+      ['doctor']
     );
     return rows.map(this._decryptUser);
   },
