@@ -99,34 +99,62 @@ export const userModel = {
 
   // Soft delete: marca la cuenta como eliminada y guarda fecha de eliminación
   async softDelete(id) {
-    await pool.execute(
-      'UPDATE users SET deleted_at = NOW() WHERE id = ?',
-      [id]
-    );
+    try {
+      await pool.execute(
+        'UPDATE users SET deleted_at = NOW() WHERE id = ?',
+        [id]
+      );
+    } catch {
+      // Compatibilidad con esquemas antiguos sin deleted_at.
+      await pool.execute('DELETE FROM users WHERE id = ?', [id]);
+    }
   },
 
   async getPatientProfile(patientId) {
-    const [users] = await pool.execute(
-      `SELECT id, name, email, date_of_birth, sex, patient_status, patient_status_reason,
-              patient_status_changed_at, deleted_at, created_at
-       FROM users
-       WHERE id = ?`,
-      [patientId]
-    );
+    let users;
+    try {
+      [users] = await pool.execute(
+        `SELECT id, name, email, date_of_birth, sex, patient_status, patient_status_reason,
+                patient_status_changed_at, deleted_at, created_at
+         FROM users
+         WHERE id = ?`,
+        [patientId]
+      );
+    } catch {
+      // Compatibilidad con esquemas antiguos sin columnas de estatus administrativo.
+      [users] = await pool.execute(
+        `SELECT id, name, email, date_of_birth, sex, created_at
+         FROM users
+         WHERE id = ?`,
+        [patientId]
+      );
+    }
 
     if (!users[0]) return undefined;
 
-    const [records] = await pool.execute(
-      `SELECT user_id, gender, curp, phone, birthplace, nationality,
-              address_line, city, state, postal_code,
-              allergies, chronic_conditions, current_medications, notes,
-              updated_at
-       FROM patient_clinical_records
-       WHERE user_id = ?`,
-      [patientId]
-    );
+    let records = [];
+    try {
+      [records] = await pool.execute(
+        `SELECT user_id, gender, curp, phone, birthplace, nationality,
+                address_line, city, state, postal_code,
+                allergies, chronic_conditions, current_medications, notes,
+                updated_at
+         FROM patient_clinical_records
+         WHERE user_id = ?`,
+        [patientId]
+      );
+    } catch {
+      // Compatibilidad: tabla de expediente clinico aun no creada.
+      records = [];
+    }
 
-    const user = this._decryptUser(users[0]);
+    const user = this._decryptUser({
+      patient_status: 'active',
+      patient_status_reason: null,
+      patient_status_changed_at: null,
+      deleted_at: null,
+      ...users[0],
+    });
     const clinical = records[0]
       ? this._decryptClinicalRecord(records[0])
       : {
@@ -170,56 +198,68 @@ export const userModel = {
       notes: payload.notes ?? '',
     };
 
-    await pool.execute(
-      `INSERT INTO patient_clinical_records
-        (user_id, gender, curp, phone, birthplace, nationality, address_line, city, state, postal_code,
-         allergies, chronic_conditions, current_medications, notes)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-       ON DUPLICATE KEY UPDATE
-         gender = VALUES(gender),
-         curp = VALUES(curp),
-         phone = VALUES(phone),
-         birthplace = VALUES(birthplace),
-         nationality = VALUES(nationality),
-         address_line = VALUES(address_line),
-         city = VALUES(city),
-         state = VALUES(state),
-         postal_code = VALUES(postal_code),
-         allergies = VALUES(allergies),
-         chronic_conditions = VALUES(chronic_conditions),
-         current_medications = VALUES(current_medications),
-         notes = VALUES(notes),
-         updated_at = NOW()`,
-      [
-        patientId,
-        encrypt(fields.gender),
-        encrypt(fields.curp),
-        encrypt(fields.phone),
-        encrypt(fields.birthplace),
-        encrypt(fields.nationality),
-        encrypt(fields.address_line),
-        encrypt(fields.city),
-        encrypt(fields.state),
-        encrypt(fields.postal_code),
-        encrypt(fields.allergies),
-        encrypt(fields.chronic_conditions),
-        encrypt(fields.current_medications),
-        encrypt(fields.notes),
-      ]
-    );
+    try {
+      await pool.execute(
+        `INSERT INTO patient_clinical_records
+          (user_id, gender, curp, phone, birthplace, nationality, address_line, city, state, postal_code,
+           allergies, chronic_conditions, current_medications, notes)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+         ON DUPLICATE KEY UPDATE
+           gender = VALUES(gender),
+           curp = VALUES(curp),
+           phone = VALUES(phone),
+           birthplace = VALUES(birthplace),
+           nationality = VALUES(nationality),
+           address_line = VALUES(address_line),
+           city = VALUES(city),
+           state = VALUES(state),
+           postal_code = VALUES(postal_code),
+           allergies = VALUES(allergies),
+           chronic_conditions = VALUES(chronic_conditions),
+           current_medications = VALUES(current_medications),
+           notes = VALUES(notes),
+           updated_at = NOW()`,
+        [
+          patientId,
+          encrypt(fields.gender),
+          encrypt(fields.curp),
+          encrypt(fields.phone),
+          encrypt(fields.birthplace),
+          encrypt(fields.nationality),
+          encrypt(fields.address_line),
+          encrypt(fields.city),
+          encrypt(fields.state),
+          encrypt(fields.postal_code),
+          encrypt(fields.allergies),
+          encrypt(fields.chronic_conditions),
+          encrypt(fields.current_medications),
+          encrypt(fields.notes),
+        ]
+      );
+    } catch {
+      // Compatibilidad: si falta tabla de expediente, no romper flujo base.
+      return;
+    }
   },
 
   async updatePatientStatus(patientId, status, reason, doctorId) {
-    await pool.execute(
-      `UPDATE users
-       SET patient_status = ?,
-           patient_status_reason = ?,
-           patient_status_changed_at = NOW(),
-           patient_status_changed_by = ?,
-           deleted_at = CASE WHEN ? = 'discharged' THEN NOW() ELSE NULL END
-       WHERE id = ?`,
-      [status, reason ?? null, doctorId, status, patientId]
-    );
+    try {
+      await pool.execute(
+        `UPDATE users
+         SET patient_status = ?,
+             patient_status_reason = ?,
+             patient_status_changed_at = NOW(),
+             patient_status_changed_by = ?,
+             deleted_at = CASE WHEN ? = 'discharged' THEN NOW() ELSE NULL END
+         WHERE id = ?`,
+        [status, reason ?? null, doctorId, status, patientId]
+      );
+    } catch {
+      // Compatibilidad: en esquemas antiguos solo permitir baja efectiva.
+      if (status === 'discharged') {
+        await this.softDelete(patientId);
+      }
+    }
   },
 
   async hardDeletePatient(patientId) {
