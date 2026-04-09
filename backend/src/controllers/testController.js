@@ -18,20 +18,20 @@ export const testController = {
         return res.status(400).json({ error: 'patient_id es requerido para crear sesión' });
       }
 
-      const inProgress = await testModel.getAnyInProgressSessionByPatient(patient_id);
+      const inProgress = await testModel.getInProgressSessionByPatient(patient_id, instrument_code);
       if (inProgress) {
         return res.status(200).json({
           message: 'Sesión en progreso recuperada',
           session_id: inProgress.id,
-          instrument_code: inProgress.instrument_code || instrument_code,
+          instrument_code,
           resumed: true
         });
       }
 
-         const pendingFeedback = await testModel.getAnyCompletedSessionWithoutFeedback(patient_id);
+         const pendingFeedback = await testModel.getCompletedSessionWithoutFeedback(patient_id, instrument_code);
          if (pendingFeedback) {
            return res.status(409).json({
-             error: 'Debes esperar la retroalimentación de tu último test antes de iniciar uno nuevo.'
+             error: 'Debes esperar la retroalimentación de este test antes de iniciar uno nuevo.'
            });
          }
 
