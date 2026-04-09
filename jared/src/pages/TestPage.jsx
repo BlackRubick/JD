@@ -10,9 +10,11 @@ import { questionAPI, testAPI } from '../lib/api';
 function TestPage({ role, onLogout }) {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const instrumentCode = String(searchParams.get('instrument') || 'CESD').toUpperCase();
+  const instrumentParam = searchParams.get('instrument');
+  const hasInstrument = Boolean(instrumentParam);
+  const instrumentCode = String(instrumentParam || '').toUpperCase();
   const [isMobile, setIsMobile] = useState(() => window.innerWidth <= 920);
-  const [activeInstrumentCode, setActiveInstrumentCode] = useState(instrumentCode);
+  const [activeInstrumentCode, setActiveInstrumentCode] = useState(instrumentCode || 'CESD');
   const instrumentName = activeInstrumentCode === 'CESD' ? 'CES-D' : activeInstrumentCode;
   const [questions, setQuestions] = useState([]);
   const [responses, setResponses] = useState({});
@@ -21,8 +23,9 @@ function TestPage({ role, onLogout }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (!hasInstrument) return;
     loadQuestionsAndStartSession();
-  }, [instrumentCode]);
+  }, [instrumentCode, hasInstrument]);
 
   useEffect(() => {
     const onResize = () => setIsMobile(window.innerWidth <= 920);
@@ -155,6 +158,39 @@ function TestPage({ role, onLogout }) {
   };
 
   if (loading || questions.length === 0) {
+    if (!hasInstrument) {
+      const instruments = [
+        { code: 'CESD', name: 'CES-D', desc: 'Escala de depresión del Centro de Estudios Epidemiológicos' },
+        { code: 'PSS', name: 'PSS-14', desc: 'Escala de Estrés Percibido' },
+        { code: 'IDARE', name: 'IDARE', desc: 'Inventario de Ansiedad Estado-Rasgo' },
+        { code: 'BSS', name: 'BSS', desc: 'Escala de Ideación Suicida de Beck' },
+      ];
+
+      return (
+        <Shell role={role} onLogout={onLogout}>
+          <InnerPage title="Selecciona una evaluación" subtitle="Debes elegir uno de los 4 tests" icon="🧭">
+            <div style={{ padding: isMobile ? '1rem' : '2rem' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(2, minmax(0, 1fr))', gap: '1rem' }}>
+                {instruments.map((item) => (
+                  <div key={item.code} className="card" style={{ padding: '1rem' }}>
+                    <h3 style={{ margin: 0, marginBottom: 8, color: '#0f172a' }}>{item.name}</h3>
+                    <p style={{ margin: 0, color: '#475569', fontSize: '0.9rem', lineHeight: 1.55 }}>{item.desc}</p>
+                    <button
+                      className="btn-primary"
+                      style={{ marginTop: 12, width: '100%' }}
+                      onClick={() => navigate(`/test?instrument=${item.code}`)}
+                    >
+                      Iniciar {item.name}
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </InnerPage>
+        </Shell>
+      );
+    }
+
     return (
       <Shell role={role} onLogout={onLogout}>
         <InnerPage title="Cargando..." subtitle="" icon="⏳">

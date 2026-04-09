@@ -180,10 +180,10 @@ function HomePage({ role, onLogout }) {
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 20, marginBottom: 32 }}>
             {[
-              { name: 'CES-D', desc: 'Escala de depresión del Centro de Estudios Epidemiológicos', icon: '🧩', color: '#2563eb' },
-              { name: 'PSS', desc: 'Escala de estrés percibido', icon: '⚡', color: '#0891b2' },
-              { name: 'IDARE', desc: 'Inventario de Ansiedad Estado-Rasgo', icon: '📝', color: '#f59e42' },
-              { name: 'BSS', desc: 'Escala de desesperanza de Beck', icon: '🕊️', color: '#10b981' },
+              { code: 'CESD', name: 'CES-D', desc: 'Escala de depresión del Centro de Estudios Epidemiológicos', icon: '🧩', color: '#2563eb' },
+              { code: 'PSS', name: 'PSS', desc: 'Escala de estrés percibido', icon: '⚡', color: '#0891b2' },
+              { code: 'IDARE', name: 'IDARE', desc: 'Inventario de Ansiedad Estado-Rasgo', icon: '📝', color: '#f59e42' },
+              { code: 'BSS', name: 'BSS', desc: 'Escala de desesperanza de Beck', icon: '🕊️', color: '#10b981' },
             ].map((t) => (
               <div key={t.name} className="card" style={{ padding: '24px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
@@ -201,7 +201,7 @@ function HomePage({ role, onLogout }) {
                     <button
                       className="btn-primary"
                       style={{ marginTop: 14, width: '100%', padding: '10px 14px' }}
-                      onClick={() => handleStartEvaluation(t.name.replace('-', ''))}
+                      onClick={() => handleStartEvaluation(t.code)}
                     >
                       Realizar {t.name}
                     </button>
