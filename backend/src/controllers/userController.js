@@ -114,6 +114,23 @@ export const userController = {
     }
   },
 
+  async deletePatient(req, res) {
+    try {
+      const patientId = req.params.patient_id;
+      const exists = await userModel.existsPatientById(patientId);
+
+      if (!exists) {
+        return res.status(404).json({ error: 'Paciente no encontrado' });
+      }
+
+      await userModel.hardDeletePatient(patientId);
+      res.json({ message: 'Paciente eliminado permanentemente' });
+    } catch (error) {
+      console.error('Error al eliminar paciente:', error);
+      res.status(500).json({ error: 'Error al eliminar paciente' });
+    }
+  },
+
   // Soft delete: marca la cuenta como eliminada y guarda fecha de eliminación
   async deleteOwnAccount(req, res) {
     try {

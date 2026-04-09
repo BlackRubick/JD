@@ -222,6 +222,21 @@ export const userModel = {
     );
   },
 
+  async hardDeletePatient(patientId) {
+    await pool.execute(
+      'DELETE FROM users WHERE id = ? AND role = ?',
+      [patientId, 'patient']
+    );
+  },
+
+  async existsPatientById(patientId) {
+    const [rows] = await pool.execute(
+      'SELECT id FROM users WHERE id = ? AND role = ? LIMIT 1',
+      [patientId, 'patient']
+    );
+    return Boolean(rows[0]);
+  },
+
   // Utilidad para desencriptar los campos de usuario
   _decryptUser(user) {
     return {
