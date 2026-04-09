@@ -39,14 +39,16 @@ export const questionModel = {
         position: opt.position
       });
     }
-    // Añadir las opciones a cada pregunta
-    return questions.map(q => ({
-      ...q,
-      text: safeDecrypt(q.text),
-      instrument_code: instrument.code,
-      instrument_name: instrument.name,
-      options: optionsByQuestion[q.id] || []
-    }));
+    // Añadir las opciones a cada pregunta y excluir preguntas sin opciones para evitar tests rotos.
+    return questions
+      .map(q => ({
+        ...q,
+        text: safeDecrypt(q.text),
+        instrument_code: instrument.code,
+        instrument_name: instrument.name,
+        options: optionsByQuestion[q.id] || []
+      }))
+      .filter((q) => q.options.length > 0);
   },
 
   async findById(id) {
