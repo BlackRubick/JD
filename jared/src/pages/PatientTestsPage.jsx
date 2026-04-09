@@ -5,10 +5,19 @@ import Shell from '../components/Shell';
 import InnerPage from '../components/InnerPage';
 import { testAPI, userAPI } from '../lib/api';
 
+function getStatusColors(code) {
+  if (code === 'feedback_done') return { bg: '#dcfce7', fg: '#166534' };
+  if (code === 'pending_feedback') return { bg: '#fef3c7', fg: '#854d0e' };
+  if (code === 'in_progress') return { bg: '#dbeafe', fg: '#1e3a8a' };
+  return { bg: '#e2e8f0', fg: '#334155' };
+}
+
 function PatientTestsPage({ role, onLogout }) {
   const { patientId } = useParams();
+  const [isMobile, setIsMobile] = useState(() => window.innerWidth <= 920);
   const [patient, setPatient] = useState(null);
   const [tests, setTests] = useState([]);
+  const [instrumentStatuses, setInstrumentStatuses] = useState([]);
   const [selectedTest, setSelectedTest] = useState(null);
   const [testDetails, setTestDetails] = useState(null);
   const [feedbackText, setFeedbackText] = useState('');
@@ -18,16 +27,24 @@ function PatientTestsPage({ role, onLogout }) {
     loadData();
   }, [patientId]);
 
+  useEffect(() => {
+    const onResize = () => setIsMobile(window.innerWidth <= 920);
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, []);
+
   const loadData = async () => {
     try {
-      const [patientsData, testsData] = await Promise.all([
+      const [patientsData, testsData, statusesData] = await Promise.all([
         userAPI.getAllPatients(),
-        testAPI.getPatientSessions(patientId)
+        testAPI.getPatientSessions(patientId),
+        testAPI.getPatientStatuses(patientId),
       ]);
       
       const foundPatient = patientsData.find(p => p.id === parseInt(patientId));
       setPatient(foundPatient);
       setTests(testsData);
+      setInstrumentStatuses(statusesData);
     } catch (error) {
       Swal.fire({
         title: 'Error',
@@ -107,7 +124,19 @@ function PatientTestsPage({ role, onLogout }) {
         icon="📊"
       >
         <div style={{ padding: '2rem' }}>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '2rem' }}>
+          <div className="card" style={{ padding: '1rem', marginBottom: '1rem' }}>
+            <h3 style={{ marginBottom: '0.75rem', color: '#001f3f', fontSize: '1rem' }}>Estatus de evaluaciones</h3>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(170px, 1fr))', gap: '0.75rem' }}>
+              {instrumentStatuses.map((item) => (
+                <div key={item.instrument_code} style={{ padding: '0.75rem', border: '1px solid #e2e8f0', borderRadius: 10, background: '#f8fafc' }}>
+                  <div style={{ fontWeight: 700, color: '#0f172a', marginBottom: 4 }}>{item.instrument_name}</div>
+                  <div style={{ fontSize: '0.82rem', color: '#334155' }}>{item.state_label}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 2fr', gap: '2rem' }}>
             <div>
               <h3 style={{ marginBottom: '1rem' }}>Historial de Tests</h3>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
@@ -129,16 +158,22 @@ function PatientTestsPage({ role, onLogout }) {
                         day: 'numeric'
                       })}
                     </div>
+                    <div style={{ fontSize: '0.8rem', marginBottom: '0.4rem', color: '#334155', fontWeight: 600 }}>
+                      Instrumento: {test.instrument_name || test.instrument_code || 'CES-D'}
+                    </div>
                     <div style={{ 
                       display: 'inline-block',
                       padding: '0.25rem 0.75rem',
                       borderRadius: '12px',
                       fontSize: '0.75rem',
                       fontWeight: 600,
-                      background: test.status === 'completed' ? '#d4edda' : '#fff3cd',
-                      color: test.status === 'completed' ? '#155724' : '#856404'
+                      background: getStatusColors(test.business_status_code).bg,
+                      color: getStatusColors(test.business_status_code).fg
                     }}>
-                      {test.status === 'completed' ? 'Completado' : 'En progreso'}
+                      {test.business_status || (test.status === 'completed' ? 'Finalizado' : 'En progreso')}
+                    </div>
+                    <div style={{ fontSize: '0.75rem', marginTop: '0.35rem', color: '#64748b' }}>
+                      Estado de captura: {test.completion_status_label || (test.status === 'completed' ? 'Finalizado' : 'En progreso')}
                     </div>
                     {test.total_score !== null && (
                       <div style={{ marginTop: '0.5rem', fontSize: '1.1rem', fontWeight: 'bold', color: '#001f3f' }}>

@@ -5,15 +5,15 @@ import Shell from '../components/Shell';
 function HomePage({ role, onLogout }) {
   const navigate = useNavigate();
 
-  const handleStartEvaluation = async () => {
+  const handleStartEvaluation = async (instrumentCode = 'CESD') => {
     await Swal.fire({
       icon: 'info',
       title: 'Comenzando evaluación',
-      text: 'Serás redirigido al test de bienestar.',
+      text: 'Serás redirigido al test seleccionado.',
       confirmButtonText: 'Continuar',
       confirmButtonColor: '#2563eb',
     });
-    navigate('/test');
+    navigate(`/test?instrument=${instrumentCode}`);
   };
 
   const features = [
@@ -198,12 +198,19 @@ function HomePage({ role, onLogout }) {
                 <div style={{ marginTop: 16, display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.78rem', color: t.color, fontWeight: 600 }}>
                   <span>Orientativo, no diagnóstico</span>
                 </div>
+                    <button
+                      className="btn-primary"
+                      style={{ marginTop: 14, width: '100%', padding: '10px 14px' }}
+                      onClick={() => handleStartEvaluation(t.name.replace('-', ''))}
+                    >
+                      Realizar {t.name}
+                    </button>
               </div>
             ))}
           </div>
           <div style={{ textAlign: 'center' }}>
             <button className="btn-primary" onClick={handleStartEvaluation} style={{ padding: '14px 36px', fontSize: '1rem' }}>
-              Iniciar evaluación completa →
+                  Iniciar CES-D →
             </button>
           </div>
         </div>

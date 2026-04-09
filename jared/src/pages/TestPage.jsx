@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import Shell from '../components/Shell';
 import InnerPage from '../components/InnerPage';
@@ -9,6 +9,11 @@ import { questionAPI, testAPI } from '../lib/api';
 
 function TestPage({ role, onLogout }) {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const instrumentCode = String(searchParams.get('instrument') || 'CESD').toUpperCase();
+  const [isMobile, setIsMobile] = useState(() => window.innerWidth <= 920);
+  const [activeInstrumentCode, setActiveInstrumentCode] = useState(instrumentCode);
+  const instrumentName = activeInstrumentCode === 'CESD' ? 'CES-D' : activeInstrumentCode;
   const [questions, setQuestions] = useState([]);
   const [responses, setResponses] = useState({});
   const [currentQuestion, setCurrentQuestion] = useState(0);
@@ -17,15 +22,31 @@ function TestPage({ role, onLogout }) {
 
   useEffect(() => {
     loadQuestionsAndStartSession();
+  }, [instrumentCode]);
+
+  useEffect(() => {
+    const onResize = () => setIsMobile(window.innerWidth <= 920);
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
   }, []);
 
   const loadQuestionsAndStartSession = async () => {
+    setLoading(true);
+    setQuestions([]);
+    setResponses({});
+    setCurrentQuestion(0);
+    setSessionId(null);
+    setActiveInstrumentCode(instrumentCode);
+
     try {
-      const loadedQuestions = await questionAPI.getAll();
-      setQuestions(loadedQuestions);
-      
-      const session = await testAPI.createSession();
+      const session = await testAPI.createSession(null, instrumentCode);
       setSessionId(session.session_id);
+
+      const resolvedInstrumentCode = String(session.instrument_code || instrumentCode).toUpperCase();
+      setActiveInstrumentCode(resolvedInstrumentCode);
+
+      const loadedQuestions = await questionAPI.getAll(resolvedInstrumentCode);
+      setQuestions(loadedQuestions);
 
       if (session.resumed) {
         const details = await testAPI.getSessionDetails(session.session_id);
@@ -48,7 +69,7 @@ function TestPage({ role, onLogout }) {
       if (blockedByFeedback) {
         await Swal.fire({
           title: 'No puedes iniciar otro test',
-          text: 'Debes esperar la retroalimentación de tu último test para continuar.',
+          text: `Debes esperar la retroalimentación de tu último test de ${instrumentName} para continuar.`,
           icon: 'info',
           confirmButtonColor: '#0066cc',
           confirmButtonText: 'Ver mis tests'
@@ -59,7 +80,7 @@ function TestPage({ role, onLogout }) {
 
       Swal.fire({
         title: 'Error',
-        text: 'No se pudieron cargar las preguntas. Verifica tu conexión.',
+        text: `No se pudo cargar la evaluación ${instrumentCode === 'CESD' ? 'CES-D' : instrumentCode}. Verifica tu conexión.`,
         icon: 'error',
         confirmButtonColor: '#0066cc'
       });
@@ -151,11 +172,11 @@ function TestPage({ role, onLogout }) {
   return (
     <Shell role={role} onLogout={onLogout}>
       <InnerPage 
-        title="Evaluación de bienestar" 
+        title={`Evaluación ${instrumentName}`} 
         subtitle={`Pregunta ${currentQuestion + 1} de ${questions.length}`}
         icon="📋"
       >
-        <div style={{ padding: '2rem' }}>
+        <div style={{ padding: isMobile ? '1rem' : '2rem' }}>
           <div style={{ 
             marginTop: 24, 
             padding: '16px 20px',
@@ -194,9 +215,9 @@ function TestPage({ role, onLogout }) {
             </div>
           </div>
 
-          <div className="card" style={{ padding: '2rem', marginBottom: '2rem' }}>
+          <div className="card" style={{ padding: isMobile ? '1rem' : '2rem', marginBottom: '2rem' }}>
             <h3 style={{ 
-              fontSize: '1.3rem', 
+              fontSize: isMobile ? '1.05rem' : '1.3rem', 
               marginBottom: '2rem',
               color: '#001f3f',
               lineHeight: '1.6'
@@ -229,7 +250,7 @@ function TestPage({ role, onLogout }) {
                     onChange={(e) => handleResponseChange(question.id, parseInt(e.target.value))}
                     style={{ marginRight: '1rem', width: '20px', height: '20px', cursor: 'pointer' }}
                   />
-                  <span style={{ fontSize: '1rem', color: '#333' }}>
+                  <span style={{ fontSize: isMobile ? '0.92rem' : '1rem', color: '#333' }}>
                     {option.label}
                   </span>
                 </label>
@@ -237,13 +258,14 @@ function TestPage({ role, onLogout }) {
             </div>
           </div>
 
-          <div style={{ display: 'flex', justifyContent: 'space-between', gap: '1rem' }}>
+          <div style={{ display: 'flex', flexDirection: isMobile ? 'column-reverse' : 'row', justifyContent: 'space-between', gap: '1rem' }}>
             <button
               onClick={handlePrevious}
               disabled={currentQuestion === 0}
               className="btn-secondary"
               style={{
-                padding: '0.8rem 2rem',
+                padding: '0.8rem 1rem',
+                width: isMobile ? '100%' : 'auto',
                 opacity: currentQuestion === 0 ? 0.5 : 1,
                 cursor: currentQuestion === 0 ? 'not-allowed' : 'pointer'
               }}
@@ -253,7 +275,7 @@ function TestPage({ role, onLogout }) {
             <button
               onClick={handleNext}
               className="btn-primary"
-              style={{ padding: '0.8rem 2rem' }}
+              style={{ padding: '0.8rem 1rem', width: isMobile ? '100%' : 'auto' }}
             >
               {currentQuestion === questions.length - 1 ? 'Finalizar' : 'Siguiente →'}
             </button>

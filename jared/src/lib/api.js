@@ -64,6 +64,24 @@ export const userAPI = {
     return apiRequest('/users/patients');
   },
 
+  async getPatientProfile(patient_id) {
+    return apiRequest(`/users/patients/${patient_id}/profile`);
+  },
+
+  async updatePatientClinicalRecord(patient_id, payload) {
+    return apiRequest(`/users/patients/${patient_id}/clinical-record`, {
+      method: 'PUT',
+      body: JSON.stringify(payload),
+    });
+  },
+
+  async updatePatientStatus(patient_id, status, reason = '') {
+    return apiRequest(`/users/patients/${patient_id}/status`, {
+      method: 'PATCH',
+      body: JSON.stringify({ status, reason }),
+    });
+  },
+
   async createDoctor(doctorData) {
     return apiRequest('/users/doctors', {
       method: 'POST',
@@ -81,8 +99,8 @@ export const userAPI = {
 };
 
 export const questionAPI = {
-  async getAll() {
-    return apiRequest('/questions');
+  async getAll(instrumentCode = 'CESD') {
+    return apiRequest(`/questions?instrument=${encodeURIComponent(instrumentCode)}`);
   },
 
   async create(text, position) {
@@ -107,10 +125,10 @@ export const questionAPI = {
 };
 
 export const testAPI = {
-  async createSession(patient_id = null) {
+  async createSession(patient_id = null, instrument_code = 'CESD') {
     return apiRequest('/tests/sessions', {
       method: 'POST',
-      body: JSON.stringify({ patient_id }),
+      body: JSON.stringify({ patient_id, instrument_code }),
     });
   },
 
@@ -132,6 +150,10 @@ export const testAPI = {
     return apiRequest('/tests/sessions/my');
   },
 
+  async getMyStatuses() {
+    return apiRequest('/tests/statuses/my');
+  },
+
   async getAllSessions() {
     return apiRequest('/tests/sessions/all');
   },
@@ -149,5 +171,9 @@ export const testAPI = {
 
   async getPatientSessions(patient_id) {
     return apiRequest(`/tests/sessions/patient/${patient_id}`);
+  },
+
+  async getPatientStatuses(patient_id) {
+    return apiRequest(`/tests/statuses/patient/${patient_id}`);
   }
 };

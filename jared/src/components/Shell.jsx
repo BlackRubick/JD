@@ -1,6 +1,15 @@
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 
 function Shell({ children, role, onLogout }) {
+  const [isMobile, setIsMobile] = useState(() => window.innerWidth <= 920);
+
+  useEffect(() => {
+    const onResize = () => setIsMobile(window.innerWidth <= 920);
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, []);
+
   return (
     <div style={{ minHeight: '100vh', background: 'var(--navy)', display: 'flex', flexDirection: 'column' }}>
       <div className="privacy-banner">
@@ -15,8 +24,10 @@ function Shell({ children, role, onLogout }) {
       }}>
         <div style={{
           maxWidth: 1200, margin: '0 auto',
-          padding: '0 24px', height: 68,
+          padding: isMobile ? '12px 14px' : '0 24px', minHeight: 68,
           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          gap: isMobile ? 10 : 0,
+          flexWrap: isMobile ? 'wrap' : 'nowrap',
         }}>
           <Link to="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 10 }}>
             <div style={{
@@ -33,7 +44,15 @@ function Shell({ children, role, onLogout }) {
             </span>
           </Link>
 
-          <nav style={{ display: 'flex', gap: 28, alignItems: 'center' }}>
+          <nav style={{
+            display: 'flex',
+            gap: isMobile ? 14 : 28,
+            alignItems: 'center',
+            width: isMobile ? '100%' : 'auto',
+            order: isMobile ? 3 : 0,
+            overflowX: isMobile ? 'auto' : 'visible',
+            paddingBottom: isMobile ? 4 : 0,
+          }}>
             <Link to="/" className="nav-link">Inicio</Link>
             {role !== 'therapist' && (
               <Link to="/test" className="nav-link">Evaluación</Link>
@@ -52,7 +71,12 @@ function Shell({ children, role, onLogout }) {
             )}
           </nav>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 10,
+            marginLeft: isMobile ? 'auto' : 0,
+          }}>
             {role ? (
               <>
                 <span style={{
