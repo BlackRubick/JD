@@ -10,10 +10,36 @@ CREATE TABLE IF NOT EXISTS users (
   role ENUM('patient', 'doctor') NOT NULL DEFAULT 'patient',
   date_of_birth DATE,
   sex VARCHAR(50),
+  patient_status ENUM('active', 'inactive', 'discharged') NOT NULL DEFAULT 'active',
+  patient_status_reason TEXT,
+  patient_status_changed_at TIMESTAMP NULL,
+  patient_status_changed_by INT,
+  deleted_at TIMESTAMP NULL,
   created_by INT,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  FOREIGN KEY (patient_status_changed_by) REFERENCES users(id) ON DELETE SET NULL,
   FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL
+);
+
+CREATE TABLE IF NOT EXISTS patient_clinical_records (
+  id INT PRIMARY KEY AUTO_INCREMENT,
+  user_id INT NOT NULL UNIQUE,
+  gender VARCHAR(100),
+  curp VARCHAR(50),
+  phone VARCHAR(50),
+  birthplace VARCHAR(255),
+  nationality VARCHAR(100),
+  address_line VARCHAR(255),
+  city VARCHAR(120),
+  state VARCHAR(120),
+  postal_code VARCHAR(20),
+  allergies TEXT,
+  chronic_conditions TEXT,
+  current_medications TEXT,
+  notes TEXT,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS questions (
@@ -31,6 +57,7 @@ CREATE TABLE IF NOT EXISTS test_sessions (
   id INT PRIMARY KEY AUTO_INCREMENT,
   patient_id INT NOT NULL,
   assigned_by INT,
+  instrument_code ENUM('CESD', 'PSS', 'IDARE', 'BSS') NOT NULL DEFAULT 'CESD',
   status ENUM('pending', 'in_progress', 'completed') DEFAULT 'pending',
   total_score INT,
   started_at TIMESTAMP NULL,

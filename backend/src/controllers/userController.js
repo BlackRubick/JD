@@ -1,5 +1,6 @@
 import bcrypt from 'bcryptjs';
 import { userModel } from '../models/userModel.js';
+import { testModel } from '../models/testModel.js';
 
 export const userController = {
   async getAllPatients(req, res) {
@@ -48,6 +49,68 @@ export const userController = {
     } catch (error) {
       console.error('Error al obtener doctores:', error);
       res.status(500).json({ error: 'Error al obtener doctores' });
+    }
+  },
+
+  async getPatientProfile(req, res) {
+    try {
+      const patientId = req.params.patient_id;
+      const profile = await userModel.getPatientProfile(patientId);
+
+      if (!profile) {
+        return res.status(404).json({ error: 'Paciente no encontrado' });
+      }
+
+      const [tests, statuses] = await Promise.all([
+        testModel.getSessionsByPatient(patientId),
+        testModel.getPatientInstrumentStatuses(patientId),
+      ]);
+
+      res.json({
+        patient: profile,
+        evaluation_statuses: statuses,
+        tests,
+      });
+    } catch (error) {
+      console.error('Error al obtener perfil del paciente:', error);
+      res.status(500).json({ error: 'Error al obtener perfil del paciente' });
+    }
+  },
+
+  async updatePatientClinicalRecord(req, res) {
+    try {
+      const patientId = req.params.patient_id;
+      await userModel.upsertClinicalRecord(patientId, req.body || {});
+      const profile = await userModel.getPatientProfile(patientId);
+      res.json({
+        message: 'Expediente clinico actualizado',
+        patient: profile,
+      });
+    } catch (error) {
+      console.error('Error al actualizar expediente clinico:', error);
+      res.status(500).json({ error: 'Error al actualizar expediente clinico' });
+    }
+  },
+
+  async updatePatientStatus(req, res) {
+    try {
+      const patientId = req.params.patient_id;
+      const { status, reason } = req.body;
+      const allowed = ['active', 'inactive', 'discharged'];
+
+      if (!allowed.includes(status)) {
+        return res.status(400).json({ error: 'status invalido' });
+      }
+
+      await userModel.updatePatientStatus(patientId, status, reason, req.user.id);
+      const profile = await userModel.getPatientProfile(patientId);
+      res.json({
+        message: 'Estatus del paciente actualizado',
+        patient: profile,
+      });
+    } catch (error) {
+      console.error('Error al actualizar estatus del paciente:', error);
+      res.status(500).json({ error: 'Error al actualizar estatus del paciente' });
     }
   },
 

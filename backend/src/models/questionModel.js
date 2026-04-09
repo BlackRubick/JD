@@ -1,12 +1,27 @@
 
 import pool from '../config/database.js';
 import { encrypt, decrypt } from '../utils/crypto.js';
+import { getInstrumentMeta, normalizeInstrument } from '../utils/instrumentCatalog.js';
+
+function safeDecrypt(value) {
+  if (value === null || value === undefined) return value;
+  if (typeof value !== 'string') return value;
+  if (!value.includes(':')) return value;
+
+  try {
+    return decrypt(value);
+  } catch {
+    return value;
+  }
+}
 
 export const questionModel = {
-  async getAll() {
+  async getAll(instrumentCode) {
+    const instrument = getInstrumentMeta(normalizeInstrument(instrumentCode));
     // Obtener todas las preguntas activas
     const [questions] = await pool.execute(
-      'SELECT * FROM questions WHERE is_active = TRUE ORDER BY position, id'
+      'SELECT * FROM questions WHERE is_active = TRUE AND position BETWEEN ? AND ? ORDER BY position, id',
+      [instrument.minPosition, instrument.maxPosition]
     );
     // Obtener todas las opciones de respuesta asociadas
     const [options] = await pool.execute(
@@ -18,8 +33,8 @@ export const questionModel = {
       if (!optionsByQuestion[opt.question_id]) optionsByQuestion[opt.question_id] = [];
       optionsByQuestion[opt.question_id].push({
         id: opt.id,
-        label: opt.label ? decrypt(opt.label) : opt.label,
-        value: opt.value ? decrypt(opt.value) : opt.value,
+        label: safeDecrypt(opt.label),
+        value: Number(opt.value),
         score: opt.score,
         position: opt.position
       });
@@ -27,7 +42,9 @@ export const questionModel = {
     // Añadir las opciones a cada pregunta
     return questions.map(q => ({
       ...q,
-      text: q.text ? decrypt(q.text) : q.text,
+      text: safeDecrypt(q.text),
+      instrument_code: instrument.code,
+      instrument_name: instrument.name,
       options: optionsByQuestion[q.id] || []
     }));
   },
@@ -40,7 +57,7 @@ export const questionModel = {
     if (!rows[0]) return undefined;
     return {
       ...rows[0],
-      text: rows[0].text ? decrypt(rows[0].text) : rows[0].text
+      text: safeDecrypt(rows[0].text)
     };
   },
 
@@ -55,7 +72,7 @@ export const questionModel = {
   async addAnswerOption(question_id, label, value, score, position) {
     const [result] = await pool.execute(
       'INSERT INTO answer_options (question_id, label, value, score, position) VALUES (?, ?, ?, ?, ?)',
-      [question_id, encrypt(label), encrypt(value), score, position]
+      [question_id, encrypt(label), Number(value), score, position]
     );
     return result.insertId;
   },

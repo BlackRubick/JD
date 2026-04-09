@@ -27,6 +27,16 @@ Editar `.env` con tus credenciales de MySQL.
 mysql -u root -p < database.sql
 ```
 
+4. Aplicar migración de sesiones por instrumento:
+```bash
+mysql -u root -p psybioneer < migrations/2026-04-08_phase1_test_instruments.sql
+```
+
+5. Aplicar migración de expediente clinico y estatus administrativo:
+```bash
+mysql -u root -p psybioneer < migrations/2026-04-09_phase2_patient_profile_nom024.sql
+```
+
 ## Iniciar el servidor
 
 ```bash

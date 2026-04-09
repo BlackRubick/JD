@@ -49,6 +49,16 @@ O desde dentro de MySQL:
 source /ruta/completa/al/archivo/database.sql
 ```
 
+Aplicar migración de fase 1 (sesiones por instrumento):
+```bash
+mysql -u root -p psybioneer < migrations/2026-04-08_phase1_test_instruments.sql
+```
+
+Aplicar migración de fase 2 (expediente clinico y estatus de pacientes):
+```bash
+mysql -u root -p psybioneer < migrations/2026-04-09_phase2_patient_profile_nom024.sql
+```
+
 ### 5. Generar hashes de contraseñas
 
 ```bash

@@ -3,7 +3,7 @@ import { questionModel } from '../models/questionModel.js';
 export const questionController = {
   async getAll(req, res) {
     try {
-         const questions = await questionModel.getAll();
+         const questions = await questionModel.getAll(req.query.instrument);
          res.json(questions);
     } catch (error) {
       console.error('Error al obtener preguntas:', error);
