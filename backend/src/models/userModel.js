@@ -66,11 +66,26 @@ export const userModel = {
 
 
   async getAllPatients() {
-    const [rows] = await pool.execute(
-      'SELECT id, name, email, date_of_birth, sex, created_at, patient_status, patient_status_reason, deleted_at FROM users WHERE role = ?',
-      ['patient']
-    );
-    return rows.map(this._decryptUser);
+    try {
+      const [rows] = await pool.execute(
+        'SELECT id, name, email, date_of_birth, sex, created_at, patient_status, patient_status_reason, deleted_at FROM users WHERE role = ?',
+        ['patient']
+      );
+      return rows.map(this._decryptUser);
+    } catch {
+      // Compatibilidad con esquemas anteriores donde aun no existen columnas de fase 2.
+      const [rows] = await pool.execute(
+        'SELECT id, name, email, date_of_birth, sex, created_at FROM users WHERE role = ?',
+        ['patient']
+      );
+
+      return rows.map((row) => ({
+        ...this._decryptUser(row),
+        patient_status: 'active',
+        patient_status_reason: null,
+        deleted_at: null,
+      }));
+    }
   },
 
 
