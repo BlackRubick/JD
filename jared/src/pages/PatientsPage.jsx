@@ -156,6 +156,56 @@ function PatientsPage({ role, onLogout }) {
     }
   };
 
+  const handleDeletePatient = async () => {
+    if (!selectedPatient || !selectedProfile) return;
+
+    const confirmationText = `ELIMINAR ${selectedProfile.name}`;
+    const { value } = await Swal.fire({
+      icon: 'warning',
+      title: 'Eliminar paciente permanentemente',
+      html: `Esta accion eliminara al paciente y su informacion asociada.<br/><strong>Escribe:</strong> ${confirmationText}`,
+      input: 'text',
+      inputPlaceholder: confirmationText,
+      showCancelButton: true,
+      confirmButtonText: 'Eliminar',
+      cancelButtonText: 'Cancelar',
+      confirmButtonColor: '#dc2626',
+    });
+
+    if (value === undefined) return;
+
+    if (String(value || '').trim() !== confirmationText) {
+      await Swal.fire({
+        icon: 'error',
+        title: 'Confirmacion invalida',
+        text: 'No se elimino el paciente porque el texto no coincide.',
+        confirmButtonColor: '#0066cc',
+      });
+      return;
+    }
+
+    try {
+      await userAPI.deletePatient(selectedPatient);
+      await loadPatients();
+      setSelectedPatient(null);
+      setSelectedProfile(null);
+      setPatientTests([]);
+      await Swal.fire({
+        icon: 'success',
+        title: 'Paciente eliminado',
+        timer: 1200,
+        showConfirmButton: false,
+      });
+    } catch (error) {
+      await Swal.fire({
+        icon: 'error',
+        title: 'No se pudo eliminar',
+        text: error.message || 'Error al eliminar paciente',
+        confirmButtonColor: '#0066cc',
+      });
+    }
+  };
+
   return (
     <Shell role={role} onLogout={onLogout}>
       <InnerPage 
@@ -320,6 +370,9 @@ function PatientsPage({ role, onLogout }) {
                         <button className="btn-ghost" onClick={() => updateStatus('inactive')}>Inhabilitar</button>
                         <button className="btn-ghost" onClick={() => updateStatus('discharged')} style={{ borderColor: '#fecaca', color: '#b91c1c' }}>
                           Dar de baja
+                        </button>
+                        <button className="btn-ghost" onClick={handleDeletePatient} style={{ borderColor: '#ef4444', color: '#b91c1c' }}>
+                          Eliminar paciente
                         </button>
                       </div>
                     </div>

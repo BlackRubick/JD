@@ -82,6 +82,12 @@ export const userAPI = {
     });
   },
 
+  async deletePatient(patient_id) {
+    return apiRequest(`/users/patients/${patient_id}`, {
+      method: 'DELETE',
+    });
+  },
+
   async createDoctor(doctorData) {
     return apiRequest('/users/doctors', {
       method: 'POST',
