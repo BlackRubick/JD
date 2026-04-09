@@ -156,10 +156,10 @@ function PatientsPage({ role, onLogout }) {
     }
   };
 
-  const handleDeletePatient = async () => {
-    if (!selectedPatient || !selectedProfile) return;
+  const handleDeletePatient = async (patientId, patientName) => {
+    if (!patientId || !patientName) return;
 
-    const confirmationText = `ELIMINAR ${selectedProfile.name}`;
+    const confirmationText = `ELIMINAR ${patientName}`;
     const { value } = await Swal.fire({
       icon: 'warning',
       title: 'Eliminar paciente permanentemente',
@@ -185,11 +185,15 @@ function PatientsPage({ role, onLogout }) {
     }
 
     try {
-      await userAPI.deletePatient(selectedPatient);
+      await userAPI.deletePatient(patientId);
       await loadPatients();
-      setSelectedPatient(null);
-      setSelectedProfile(null);
-      setPatientTests([]);
+
+      if (selectedPatient === patientId) {
+        setSelectedPatient(null);
+        setSelectedProfile(null);
+        setPatientTests([]);
+      }
+
       await Swal.fire({
         icon: 'success',
         title: 'Paciente eliminado',
@@ -274,6 +278,16 @@ function PatientsPage({ role, onLogout }) {
                         >
                           Ver tests →
                         </Link>
+                        <button
+                          className="btn-ghost"
+                          style={{ marginTop: 8, borderColor: '#ef4444', color: '#b91c1c', width: '100%' }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDeletePatient(patient.id, patient.name);
+                          }}
+                        >
+                          Eliminar
+                        </button>
                       </div>
                     </div>
 
@@ -371,7 +385,7 @@ function PatientsPage({ role, onLogout }) {
                         <button className="btn-ghost" onClick={() => updateStatus('discharged')} style={{ borderColor: '#fecaca', color: '#b91c1c' }}>
                           Dar de baja
                         </button>
-                        <button className="btn-ghost" onClick={handleDeletePatient} style={{ borderColor: '#ef4444', color: '#b91c1c' }}>
+                        <button className="btn-ghost" onClick={() => handleDeletePatient(selectedPatient, selectedProfile?.name)} style={{ borderColor: '#ef4444', color: '#b91c1c' }}>
                           Eliminar paciente
                         </button>
                       </div>
