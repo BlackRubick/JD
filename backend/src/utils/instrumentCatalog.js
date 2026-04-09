@@ -2,26 +2,38 @@ const INSTRUMENTS = {
   CESD: {
     code: 'CESD',
     name: 'CES-D',
+    minId: 1,
+    maxId: 20,
     minPosition: 1,
     maxPosition: 20,
+    expectedQuestions: 20,
   },
   PSS: {
     code: 'PSS',
     name: 'PSS',
+    minId: 21,
+    maxId: 34,
     minPosition: 21,
     maxPosition: 34,
+    expectedQuestions: 14,
   },
   IDARE: {
     code: 'IDARE',
     name: 'IDARE',
+    minId: 35,
+    maxId: 74,
     minPosition: 35,
     maxPosition: 74,
+    expectedQuestions: 40,
   },
   BSS: {
     code: 'BSS',
     name: 'BSS',
+    minId: 75,
+    maxId: 93,
     minPosition: 75,
     maxPosition: 93,
+    expectedQuestions: 19,
   },
 };
 

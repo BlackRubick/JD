@@ -20,8 +20,8 @@ export const questionModel = {
     const instrument = getInstrumentMeta(normalizeInstrument(instrumentCode));
     // Obtener todas las preguntas activas
     const [questions] = await pool.execute(
-      'SELECT * FROM questions WHERE is_active = TRUE AND position BETWEEN ? AND ? ORDER BY position, id',
-      [instrument.minPosition, instrument.maxPosition]
+      'SELECT * FROM questions WHERE is_active = TRUE AND id BETWEEN ? AND ? AND position BETWEEN ? AND ? ORDER BY position, id',
+      [instrument.minId, instrument.maxId, instrument.minPosition, instrument.maxPosition]
     );
     // Obtener todas las opciones de respuesta asociadas
     const [options] = await pool.execute(
@@ -48,7 +48,8 @@ export const questionModel = {
         instrument_name: instrument.name,
         options: optionsByQuestion[q.id] || []
       }))
-      .filter((q) => q.options.length > 0);
+      .filter((q) => q.options.length > 0)
+      .slice(0, instrument.expectedQuestions);
   },
 
   async findById(id) {
