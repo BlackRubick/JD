@@ -1,8 +1,25 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import Swal from 'sweetalert2';
 
 function Shell({ children, role, onLogout }) {
   const [isMobile, setIsMobile] = useState(() => window.innerWidth <= 920);
+
+  const openTechnicalSupport = async () => {
+    await Swal.fire({
+      icon: 'info',
+      title: 'Servicio técnico',
+      html: `
+        <div style="text-align:left; line-height:1.7; font-size:0.95rem;">
+          <div><strong>Correos de soporte:</strong></div>
+          <div>233127@ib.upchiapas.edu.mx</div>
+          <div>233049@ib.upchiapas.edu.mx</div>
+        </div>
+      `,
+      confirmButtonText: 'Cerrar',
+      confirmButtonColor: '#2563eb',
+    });
+  };
 
   useEffect(() => {
     const onResize = () => setIsMobile(window.innerWidth <= 920);
@@ -125,7 +142,6 @@ function Shell({ children, role, onLogout }) {
           </p>
 
           <div style={{ display: 'grid', gap: 6, fontSize: '0.88rem', lineHeight: 1.6 }}>
-            <div><strong>Servicio tecnico:</strong> 233127@ib.upchiapas.edu.mx · 233049@ib.upchiapas.edu.mx</div>
             <div>Ubicación: Chiapas, México</div>
             <div>Horario de atención: Lunes a viernes, 8:00 – 16:00</div>
           </div>
@@ -146,6 +162,21 @@ function Shell({ children, role, onLogout }) {
             <Link to="/privacy" style={{ color: '#fef3c7', textDecoration: 'none', fontWeight: 600, fontSize: '0.9rem' }}>
               Aviso de Privacidad
             </Link>
+            <button
+              onClick={openTechnicalSupport}
+              style={{
+                background: 'transparent',
+                border: 'none',
+                color: '#fef3c7',
+                textDecoration: 'underline',
+                fontWeight: 600,
+                fontSize: '0.9rem',
+                cursor: 'pointer',
+                padding: 0,
+              }}
+            >
+              Servicio técnico
+            </button>
           </div>
         </div>
       </footer>
