@@ -125,7 +125,7 @@ function Shell({ children, role, onLogout }) {
           </p>
 
           <div style={{ display: 'grid', gap: 6, fontSize: '0.88rem', lineHeight: 1.6 }}>
-            <div>Correo de contacto: 233127@ib.upchiapas.edu.mx · 233049@ib.upchiapas.edu.mx</div>
+            <div><strong>Servicio tecnico:</strong> 233127@ib.upchiapas.edu.mx · 233049@ib.upchiapas.edu.mx</div>
             <div>Ubicación: Chiapas, México</div>
             <div>Horario de atención: Lunes a viernes, 8:00 – 16:00</div>
           </div>
