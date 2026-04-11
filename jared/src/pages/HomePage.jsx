@@ -158,7 +158,14 @@ function HomePage({ role, onLogout }) {
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 16 }}>
             {stats.map((s) => (
               <div key={s.value} className="stat-card" style={{ textAlign: 'center' }}>
-                <div className="serif" style={{ fontSize: '2.4rem', fontWeight: 900, color: 'var(--gold)', lineHeight: 1 }}>
+                <div style={{
+                  fontFamily: "'DM Sans', sans-serif",
+                  fontSize: '2.4rem',
+                  fontWeight: 700,
+                  letterSpacing: '0',
+                  color: 'var(--gold)',
+                  lineHeight: 1
+                }}>
                   {s.value}
                 </div>
                 <div style={{ marginTop: 10, fontSize: '0.82rem', color: '#93c5fd', lineHeight: 1.5 }}>
