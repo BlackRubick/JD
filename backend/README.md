@@ -42,6 +42,11 @@ mysql -u root -p psybioneer < migrations/2026-04-09_phase2_patient_profile_nom02
 mysql -u root -p psybioneer < migrations/2026-04-11_phase3_doctor_community_code.sql
 ```
 
+7. Aplicar migración de preguntas por instrumento (sin limite de rangos fijos):
+```bash
+mysql -u root -p psybioneer < migrations/2026-04-11_phase4_question_instrument_code.sql
+```
+
 ## Iniciar el servidor
 
 ```bash

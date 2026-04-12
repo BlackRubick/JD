@@ -48,6 +48,7 @@ CREATE TABLE IF NOT EXISTS patient_clinical_records (
 CREATE TABLE IF NOT EXISTS questions (
   id INT PRIMARY KEY AUTO_INCREMENT,
   text TEXT NOT NULL,
+  instrument_code ENUM('CESD', 'PSS', 'IDARE', 'BSS') NOT NULL DEFAULT 'CESD',
   created_by INT,
   is_active BOOLEAN DEFAULT TRUE,
   position INT DEFAULT 0,

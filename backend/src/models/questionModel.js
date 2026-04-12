@@ -18,11 +18,20 @@ function safeDecrypt(value) {
 export const questionModel = {
   async getAll(instrumentCode) {
     const instrument = getInstrumentMeta(normalizeInstrument(instrumentCode));
-    // Obtener todas las preguntas activas
-    const [questions] = await pool.execute(
-      'SELECT * FROM questions WHERE is_active = TRUE AND position BETWEEN ? AND ? ORDER BY position, id',
-      [instrument.minPosition, instrument.maxPosition]
-    );
+    let questions;
+    try {
+      // Esquema nuevo: preguntas etiquetadas por instrumento.
+      [questions] = await pool.execute(
+        'SELECT * FROM questions WHERE is_active = TRUE AND instrument_code = ? ORDER BY position, id',
+        [instrument.code]
+      );
+    } catch {
+      // Compatibilidad con esquema viejo por rangos fijos.
+      [questions] = await pool.execute(
+        'SELECT * FROM questions WHERE is_active = TRUE AND position BETWEEN ? AND ? ORDER BY position, id',
+        [instrument.minPosition, instrument.maxPosition]
+      );
+    }
     // Obtener todas las opciones de respuesta asociadas
     const [options] = await pool.execute(
       'SELECT * FROM answer_options ORDER BY question_id, position, id'
@@ -44,12 +53,11 @@ export const questionModel = {
       .map(q => ({
         ...q,
         text: safeDecrypt(q.text),
-        instrument_code: instrument.code,
+        instrument_code: q.instrument_code || instrument.code,
         instrument_name: instrument.name,
         options: optionsByQuestion[q.id] || []
       }))
-      .filter((q) => q.options.length > 0)
-      .slice(0, instrument.expectedQuestions);
+      .filter((q) => q.options.length > 0);
   },
 
   async findById(id) {
@@ -64,29 +72,47 @@ export const questionModel = {
     };
   },
 
-  async create(text, position, created_by) {
-    const [result] = await pool.execute(
-      'INSERT INTO questions (text, position, created_by) VALUES (?, ?, ?)',
-      [encrypt(text), position, created_by]
-    );
-    return result.insertId;
+  async create(text, position, created_by, instrumentCode) {
+    const instrument = getInstrumentMeta(normalizeInstrument(instrumentCode));
+
+    try {
+      const [result] = await pool.execute(
+        'INSERT INTO questions (text, position, created_by, instrument_code) VALUES (?, ?, ?, ?)',
+        [encrypt(text), position, created_by, instrument.code]
+      );
+      return result.insertId;
+    } catch {
+      const [result] = await pool.execute(
+        'INSERT INTO questions (text, position, created_by) VALUES (?, ?, ?)',
+        [encrypt(text), position, created_by]
+      );
+      return result.insertId;
+    }
   },
 
   async getNextPositionForInstrument(instrumentCode) {
     const instrument = getInstrumentMeta(normalizeInstrument(instrumentCode));
-    const [rows] = await pool.execute(
-      'SELECT position FROM questions WHERE is_active = TRUE AND position BETWEEN ? AND ?',
-      [instrument.minPosition, instrument.maxPosition]
-    );
+    try {
+      const [rows] = await pool.execute(
+        'SELECT MAX(position) AS max_position FROM questions WHERE is_active = TRUE AND instrument_code = ?',
+        [instrument.code]
+      );
+      return Number(rows[0]?.max_position || 0) + 1;
+    } catch {
+      const [rows] = await pool.execute(
+        'SELECT position FROM questions WHERE is_active = TRUE AND position BETWEEN ? AND ?',
+        [instrument.minPosition, instrument.maxPosition]
+      );
 
-    const used = new Set(rows.map((row) => Number(row.position)));
-    for (let pos = instrument.minPosition; pos <= instrument.maxPosition; pos += 1) {
-      if (!used.has(pos)) {
-        return pos;
+      const used = new Set(rows.map((row) => Number(row.position)));
+      for (let pos = instrument.minPosition; pos <= instrument.maxPosition; pos += 1) {
+        if (!used.has(pos)) {
+          return pos;
+        }
       }
-    }
 
-    throw new Error('No hay espacio disponible para agregar más preguntas en este instrumento');
+      throw new Error('No hay espacio disponible para agregar mas preguntas en este instrumento. Ejecuta la migracion de instrument_code para habilitar crecimiento.');
+    }
   },
 
   async addAnswerOption(question_id, label, value, score, position) {

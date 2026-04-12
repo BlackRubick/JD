@@ -64,6 +64,11 @@ Aplicar migración de fase 3 (codigo de comunidad por doctor):
 mysql -u root -p psybioneer < migrations/2026-04-11_phase3_doctor_community_code.sql
 ```
 
+Aplicar migración de fase 4 (preguntas por instrumento sin rango fijo):
+```bash
+mysql -u root -p psybioneer < migrations/2026-04-11_phase4_question_instrument_code.sql
+```
+
 ### 5. Generar hashes de contraseñas
 
 ```bash

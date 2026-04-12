@@ -65,7 +65,7 @@ export const questionController = {
       const normalizedInstrument = normalizeInstrument(instrument);
       const position = await questionModel.getNextPositionForInstrument(normalizedInstrument);
       const normalizedOptions = sanitizeOptions(options, normalizedInstrument);
-      const questionId = await questionModel.create(text, position, req.user.id);
+      const questionId = await questionModel.create(text, position, req.user.id, normalizedInstrument);
       await questionModel.replaceAnswerOptions(questionId, normalizedOptions);
       res.status(201).json({
         message: 'Pregunta creada exitosamente',
