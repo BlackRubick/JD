@@ -75,16 +75,18 @@ export const questionModel = {
   async getNextPositionForInstrument(instrumentCode) {
     const instrument = getInstrumentMeta(normalizeInstrument(instrumentCode));
     const [rows] = await pool.execute(
-      'SELECT MAX(position) AS max_position FROM questions WHERE position BETWEEN ? AND ?',
+      'SELECT position FROM questions WHERE is_active = TRUE AND position BETWEEN ? AND ?',
       [instrument.minPosition, instrument.maxPosition]
     );
 
-    const currentMax = Number(rows[0]?.max_position || instrument.minPosition - 1);
-    const next = Math.max(instrument.minPosition, currentMax + 1);
-    if (next > instrument.maxPosition) {
-      throw new Error('No hay espacio disponible para agregar más preguntas en este instrumento');
+    const used = new Set(rows.map((row) => Number(row.position)));
+    for (let pos = instrument.minPosition; pos <= instrument.maxPosition; pos += 1) {
+      if (!used.has(pos)) {
+        return pos;
+      }
     }
-    return next;
+
+    throw new Error('No hay espacio disponible para agregar más preguntas en este instrumento');
   },
 
   async addAnswerOption(question_id, label, value, score, position) {

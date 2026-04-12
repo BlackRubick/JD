@@ -73,6 +73,9 @@ export const questionController = {
       });
     } catch (error) {
       console.error('Error al crear pregunta:', error);
+      if (String(error?.message || '').includes('No hay espacio disponible')) {
+        return res.status(400).json({ error: error.message });
+      }
       res.status(500).json({ error: 'Error al crear pregunta' });
     }
   },

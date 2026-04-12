@@ -136,7 +136,7 @@ function QuestionAdminPage({ role, onLogout }) {
     } catch (error) {
       Swal.fire({
         title: 'Error',
-        text: 'No se pudo agregar la pregunta',
+        text: error.message || 'No se pudo agregar la pregunta',
         icon: 'error',
         confirmButtonColor: '#0066cc'
       });
@@ -194,7 +194,7 @@ function QuestionAdminPage({ role, onLogout }) {
     } catch (error) {
       Swal.fire({
         title: 'Error',
-        text: 'No se pudo actualizar la pregunta',
+        text: error.message || 'No se pudo actualizar la pregunta',
         icon: 'error',
         confirmButtonColor: '#0066cc'
       });
