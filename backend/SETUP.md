@@ -69,6 +69,11 @@ Aplicar migración de fase 4 (preguntas por instrumento sin rango fijo):
 mysql -u root -p psybioneer < migrations/2026-04-11_phase4_question_instrument_code.sql
 ```
 
+Si ya se aplicó fase 4 y las preguntas quedaron todas en CES-D, ejecutar hotfix de recuperacion:
+```bash
+mysql -u root -p psybioneer < migrations/2026-04-11_phase4_hotfix_recover_instrument_split.sql
+```
+
 ### 5. Generar hashes de contraseñas
 
 ```bash

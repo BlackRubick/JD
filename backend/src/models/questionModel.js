@@ -25,6 +25,15 @@ export const questionModel = {
         'SELECT * FROM questions WHERE is_active = TRUE AND instrument_code = ? ORDER BY position, id',
         [instrument.code]
       );
+
+      // Recuperacion automatica: si no hay filas para el instrumento, intentar esquema legacy.
+      if (!questions.length) {
+        const [legacyQuestions] = await pool.execute(
+          'SELECT * FROM questions WHERE is_active = TRUE AND position BETWEEN ? AND ? ORDER BY position, id',
+          [instrument.minPosition, instrument.maxPosition]
+        );
+        if (legacyQuestions.length) questions = legacyQuestions;
+      }
     } catch {
       // Compatibilidad con esquema viejo por rangos fijos.
       [questions] = await pool.execute(

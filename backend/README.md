@@ -47,6 +47,11 @@ mysql -u root -p psybioneer < migrations/2026-04-11_phase3_doctor_community_code
 mysql -u root -p psybioneer < migrations/2026-04-11_phase4_question_instrument_code.sql
 ```
 
+8. Si las preguntas historicas quedaron en un solo instrumento, aplicar hotfix de recuperacion:
+```bash
+mysql -u root -p psybioneer < migrations/2026-04-11_phase4_hotfix_recover_instrument_split.sql
+```
+
 ## Iniciar el servidor
 
 ```bash

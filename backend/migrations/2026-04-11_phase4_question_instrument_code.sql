@@ -2,7 +2,7 @@
 -- Ejecutar una sola vez en la base de datos psybioneer.
 
 ALTER TABLE questions
-  ADD COLUMN instrument_code ENUM('CESD', 'PSS', 'IDARE', 'BSS') NOT NULL DEFAULT 'CESD' AFTER text;
+  ADD COLUMN instrument_code ENUM('CESD', 'PSS', 'IDARE', 'BSS') NULL AFTER text;
 
 -- Backfill inicial para preguntas historicas por posicion.
 UPDATE questions
@@ -14,6 +14,9 @@ SET instrument_code = CASE
   ELSE 'CESD'
 END
 WHERE instrument_code IS NULL OR instrument_code = '';
+
+ALTER TABLE questions
+  MODIFY COLUMN instrument_code ENUM('CESD', 'PSS', 'IDARE', 'BSS') NOT NULL DEFAULT 'CESD';
 
 CREATE INDEX idx_questions_instrument_active_position
   ON questions (instrument_code, is_active, position);
