@@ -109,10 +109,10 @@ export const questionAPI = {
     return apiRequest(`/questions?instrument=${encodeURIComponent(instrumentCode)}`);
   },
 
-  async create(text, position) {
+  async create(text, instrumentCode = 'CESD') {
     return apiRequest('/questions', {
       method: 'POST',
-      body: JSON.stringify({ text, position }),
+      body: JSON.stringify({ text, instrument: instrumentCode }),
     });
   },
 

@@ -20,8 +20,8 @@ export const questionModel = {
     const instrument = getInstrumentMeta(normalizeInstrument(instrumentCode));
     // Obtener todas las preguntas activas
     const [questions] = await pool.execute(
-      'SELECT * FROM questions WHERE is_active = TRUE AND id BETWEEN ? AND ? AND position BETWEEN ? AND ? ORDER BY position, id',
-      [instrument.minId, instrument.maxId, instrument.minPosition, instrument.maxPosition]
+      'SELECT * FROM questions WHERE is_active = TRUE AND position BETWEEN ? AND ? ORDER BY position, id',
+      [instrument.minPosition, instrument.maxPosition]
     );
     // Obtener todas las opciones de respuesta asociadas
     const [options] = await pool.execute(
@@ -70,6 +70,21 @@ export const questionModel = {
       [encrypt(text), position, created_by]
     );
     return result.insertId;
+  },
+
+  async getNextPositionForInstrument(instrumentCode) {
+    const instrument = getInstrumentMeta(normalizeInstrument(instrumentCode));
+    const [rows] = await pool.execute(
+      'SELECT MAX(position) AS max_position FROM questions WHERE position BETWEEN ? AND ?',
+      [instrument.minPosition, instrument.maxPosition]
+    );
+
+    const currentMax = Number(rows[0]?.max_position || instrument.minPosition - 1);
+    const next = Math.max(instrument.minPosition, currentMax + 1);
+    if (next > instrument.maxPosition) {
+      throw new Error('No hay espacio disponible para agregar más preguntas en este instrumento');
+    }
+    return next;
   },
 
   async addAnswerOption(question_id, label, value, score, position) {

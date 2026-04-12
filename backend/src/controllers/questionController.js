@@ -1,4 +1,5 @@
 import { questionModel } from '../models/questionModel.js';
+import { normalizeInstrument } from '../utils/instrumentCatalog.js';
 
 export const questionController = {
   async getAll(req, res) {
@@ -13,11 +14,13 @@ export const questionController = {
 
   async create(req, res) {
     try {
-      const { text, position } = req.body;
-      const questionId = await questionModel.create(text, position || 0, req.user.id);
+      const { text, instrument } = req.body;
+      const normalizedInstrument = normalizeInstrument(instrument);
+      const position = await questionModel.getNextPositionForInstrument(normalizedInstrument);
+      const questionId = await questionModel.create(text, position, req.user.id);
       res.status(201).json({
         message: 'Pregunta creada exitosamente',
-        question: { id: questionId, text, position }
+        question: { id: questionId, text, position, instrument: normalizedInstrument }
       });
     } catch (error) {
       console.error('Error al crear pregunta:', error);

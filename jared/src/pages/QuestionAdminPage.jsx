@@ -5,19 +5,27 @@ import InnerPage from '../components/InnerPage';
 import { questionAPI } from '../lib/api';
 
 function QuestionAdminPage({ role, onLogout }) {
+  const INSTRUMENTS = [
+    { code: 'CESD', name: 'CES-D' },
+    { code: 'PSS', name: 'PSS' },
+    { code: 'IDARE', name: 'IDARE' },
+    { code: 'BSS', name: 'BSS' },
+  ];
+
   const [questions, setQuestions] = useState([]);
   const [editingId, setEditingId] = useState(null);
   const [editText, setEditText] = useState('');
   const [newQuestionText, setNewQuestionText] = useState('');
+  const [selectedInstrument, setSelectedInstrument] = useState('CESD');
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     loadQuestions();
-  }, []);
+  }, [selectedInstrument]);
 
   const loadQuestions = async () => {
     try {
-      const loaded = await questionAPI.getAll();
+      const loaded = await questionAPI.getAll(selectedInstrument);
       setQuestions(loaded);
     } catch (error) {
       Swal.fire({
@@ -43,7 +51,7 @@ function QuestionAdminPage({ role, onLogout }) {
     }
 
     try {
-      await questionAPI.create(newQuestionText.trim(), questions.length);
+      await questionAPI.create(newQuestionText.trim(), selectedInstrument);
       setNewQuestionText('');
       await loadQuestions();
       
@@ -150,8 +158,33 @@ function QuestionAdminPage({ role, onLogout }) {
         icon="⚙️"
       >
         <div style={{ padding: '2rem' }}>
+          <div className="card" style={{ padding: '1.25rem 1.5rem', marginBottom: '1rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
+              <span style={{ color: '#001f3f', fontWeight: 700 }}>Test:</span>
+              {INSTRUMENTS.map((instrument) => (
+                <button
+                  key={instrument.code}
+                  onClick={() => setSelectedInstrument(instrument.code)}
+                  style={{
+                    padding: '0.45rem 0.85rem',
+                    borderRadius: '999px',
+                    border: selectedInstrument === instrument.code ? '2px solid #0057b8' : '1px solid #cbd5e1',
+                    background: selectedInstrument === instrument.code ? '#eff6ff' : '#fff',
+                    color: selectedInstrument === instrument.code ? '#0057b8' : '#334155',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                  }}
+                >
+                  {instrument.name}
+                </button>
+              ))}
+            </div>
+          </div>
+
           <div className="card" style={{ padding: '2rem', marginBottom: '2rem' }}>
-            <h3 style={{ marginBottom: '1rem', color: '#001f3f' }}>Agregar nueva pregunta</h3>
+            <h3 style={{ marginBottom: '1rem', color: '#001f3f' }}>
+              Agregar nueva pregunta ({selectedInstrument})
+            </h3>
             <div style={{ display: 'flex', gap: '1rem', alignItems: 'flex-start' }}>
               <textarea
                 value={newQuestionText}
@@ -179,7 +212,7 @@ function QuestionAdminPage({ role, onLogout }) {
 
           <div className="card" style={{ padding: '2rem' }}>
             <h3 style={{ marginBottom: '1.5rem', color: '#001f3f' }}>
-              Preguntas actuales ({questions.length})
+              Preguntas actuales de {selectedInstrument} ({questions.length})
             </h3>
             
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
