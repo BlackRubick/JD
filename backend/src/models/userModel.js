@@ -159,10 +159,15 @@ export const userModel = {
       return rows.map(this._decryptUser);
     } catch {
       // Compatibilidad con esquemas anteriores donde aun no existen columnas de fase 2.
-      const [rows] = await pool.execute(
-        'SELECT id, name, email, date_of_birth, sex, created_at FROM users WHERE role = ?',
-        ['patient']
-      );
+      const [rows] = doctorId
+        ? await pool.execute(
+          'SELECT id, name, email, date_of_birth, sex, created_at FROM users WHERE role = ? AND created_by = ?',
+          ['patient', doctorId]
+        )
+        : await pool.execute(
+          'SELECT id, name, email, date_of_birth, sex, created_at FROM users WHERE role = ?',
+          ['patient']
+        );
 
       return rows.map((row) => ({
         ...this._decryptUser(row),

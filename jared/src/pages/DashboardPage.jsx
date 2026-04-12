@@ -33,9 +33,10 @@ function DashboardPage({ role, onLogout }) {
       const avgScore = scoresWithValues.length > 0
         ? (scoresWithValues.reduce((sum, t) => sum + t.total_score, 0) / scoresWithValues.length).toFixed(1)
         : 0;
+      const activePatients = patients.filter((p) => (p.patient_status || 'active') === 'active');
 
       setStats({
-        totalPatients: patients.length,
+        totalPatients: activePatients.length,
         weekTests: weekTests.length,
         followupCases: completedTests.filter(t => t.total_score >= 16).length,
         avgScore
