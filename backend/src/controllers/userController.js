@@ -5,7 +5,7 @@ import { testModel } from '../models/testModel.js';
 export const userController = {
   async getAllPatients(req, res) {
     try {
-         const patients = await userModel.getAllPatients();
+         const patients = await userModel.getAllPatients(req.user.id);
          res.json(patients);
     } catch (error) {
       console.error('Error al obtener pacientes:', error);
@@ -23,18 +23,20 @@ export const userController = {
       }
 
       const hashedPassword = await bcrypt.hash(password, 10);
+      const doctorCode = await userModel.generateUniqueDoctorCode();
 
       const doctorId = await userModel.create({
         name,
         email,
         password: hashedPassword,
         role: 'doctor',
-        created_by: req.user.id
+        created_by: req.user.id,
+        doctor_code: doctorCode,
       });
 
       res.status(201).json({
         message: 'Doctor creado exitosamente',
-        doctor: { id: doctorId, name, email, role: 'doctor' }
+        doctor: { id: doctorId, name, email, role: 'doctor', doctor_code: doctorCode }
       });
     } catch (error) {
       console.error('Error al crear doctor:', error);
@@ -55,6 +57,11 @@ export const userController = {
   async getPatientProfile(req, res) {
     try {
       const patientId = req.params.patient_id;
+      const isLinked = await userModel.existsPatientLinkedToDoctor(patientId, req.user.id);
+      if (!isLinked) {
+        return res.status(403).json({ error: 'No tienes acceso a este paciente' });
+      }
+
       const profile = await userModel.getPatientProfile(patientId);
 
       if (!profile) {
@@ -80,6 +87,11 @@ export const userController = {
   async updatePatientClinicalRecord(req, res) {
     try {
       const patientId = req.params.patient_id;
+      const isLinked = await userModel.existsPatientLinkedToDoctor(patientId, req.user.id);
+      if (!isLinked) {
+        return res.status(403).json({ error: 'No tienes acceso a este paciente' });
+      }
+
       await userModel.upsertClinicalRecord(patientId, req.body || {});
       const profile = await userModel.getPatientProfile(patientId);
       res.json({
@@ -95,6 +107,11 @@ export const userController = {
   async updatePatientStatus(req, res) {
     try {
       const patientId = req.params.patient_id;
+      const isLinked = await userModel.existsPatientLinkedToDoctor(patientId, req.user.id);
+      if (!isLinked) {
+        return res.status(403).json({ error: 'No tienes acceso a este paciente' });
+      }
+
       const { status, reason } = req.body;
       const allowed = ['active', 'inactive', 'discharged'];
 
@@ -117,7 +134,7 @@ export const userController = {
   async deletePatient(req, res) {
     try {
       const patientId = req.params.patient_id;
-      const exists = await userModel.existsPatientById(patientId);
+      const exists = await userModel.existsPatientLinkedToDoctor(patientId, req.user.id);
 
       if (!exists) {
         return res.status(404).json({ error: 'Paciente no encontrado' });

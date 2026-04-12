@@ -5,11 +5,20 @@ import { userModel } from '../models/userModel.js';
 export const authController = {
   async register(req, res) {
     try {
-      const { name, email, password, date_of_birth, sex } = req.body;
+      const { name, email, password, date_of_birth, sex, doctor_code } = req.body;
+
+      if (!doctor_code) {
+        return res.status(400).json({ error: 'Debes ingresar el codigo del especialista' });
+      }
 
       const existingUser = await userModel.findByEmail(email);
       if (existingUser) {
         return res.status(400).json({ error: 'El email ya está registrado' });
+      }
+
+      const doctor = await userModel.findDoctorByCode(doctor_code);
+      if (!doctor) {
+        return res.status(400).json({ error: 'Codigo de especialista invalido' });
       }
 
       const hashedPassword = await bcrypt.hash(password, 10);
@@ -20,7 +29,9 @@ export const authController = {
         password: hashedPassword,
         role: 'patient',
         date_of_birth: date_of_birth ?? null,
-        sex: sex ?? null
+        sex: sex ?? null,
+        linked_doctor_id: doctor.id,
+        created_by: doctor.id,
       });
 
       const token = jwt.sign(
@@ -32,7 +43,7 @@ export const authController = {
       res.status(201).json({
         message: 'Usuario registrado exitosamente',
         token,
-        user: { id: userId, name, email, role: 'patient' }
+        user: { id: userId, name, email, role: 'patient', linked_doctor_id: doctor.id }
       });
     } catch (error) {
       console.error('Error en registro:', error);

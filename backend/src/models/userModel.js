@@ -17,6 +17,10 @@ function normalizeEmail(email) {
   return String(email || '').trim().toLowerCase();
 }
 
+function normalizeDoctorCode(code) {
+  return String(code || '').trim().toUpperCase();
+}
+
 export const userModel = {
 
   async findByEmail(email) {
@@ -38,39 +42,119 @@ export const userModel = {
 
 
   async findById(id) {
-    const [rows] = await pool.execute(
-      'SELECT id, name, email, role, date_of_birth, sex, created_at FROM users WHERE id = ?',
-      [id]
-    );
+    let rows;
+    try {
+      [rows] = await pool.execute(
+        'SELECT id, name, email, role, date_of_birth, sex, doctor_code, linked_doctor_id, created_at FROM users WHERE id = ?',
+        [id]
+      );
+    } catch {
+      [rows] = await pool.execute(
+        'SELECT id, name, email, role, date_of_birth, sex, created_at FROM users WHERE id = ?',
+        [id]
+      );
+    }
     if (!rows[0]) return undefined;
     return this._decryptUser(rows[0]);
   },
 
 
   async create(userData) {
-    const { name, email, password, role, date_of_birth, sex, created_by } = userData;
-    const [result] = await pool.execute(
-      'INSERT INTO users (name, email, password, role, date_of_birth, sex, created_by) VALUES (?, ?, ?, ?, ?, ?, ?)',
-      [
-        encrypt(name),
-        normalizeEmail(email),
-        password, // la contraseña ya viene hasheada
-        role ?? 'patient',
-        date_of_birth ? encrypt(date_of_birth) : null,
-        sex ? encrypt(sex) : null,
-        created_by ?? null
-      ]
-    );
-    return result.insertId;
+    const { name, email, password, role, date_of_birth, sex, created_by, doctor_code, linked_doctor_id } = userData;
+
+    try {
+      const [result] = await pool.execute(
+        `INSERT INTO users
+          (name, email, password, role, date_of_birth, sex, created_by, doctor_code, linked_doctor_id)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        [
+          encrypt(name),
+          normalizeEmail(email),
+          password,
+          role ?? 'patient',
+          date_of_birth ? encrypt(date_of_birth) : null,
+          sex ? encrypt(sex) : null,
+          created_by ?? null,
+          doctor_code ? normalizeDoctorCode(doctor_code) : null,
+          linked_doctor_id ?? null,
+        ]
+      );
+      return result.insertId;
+    } catch {
+      // Compatibilidad con esquemas sin columnas doctor_code / linked_doctor_id.
+      const [result] = await pool.execute(
+        'INSERT INTO users (name, email, password, role, date_of_birth, sex, created_by) VALUES (?, ?, ?, ?, ?, ?, ?)',
+        [
+          encrypt(name),
+          normalizeEmail(email),
+          password,
+          role ?? 'patient',
+          date_of_birth ? encrypt(date_of_birth) : null,
+          sex ? encrypt(sex) : null,
+          created_by ?? null,
+        ]
+      );
+      return result.insertId;
+    }
+  },
+
+  async generateUniqueDoctorCode() {
+    const alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+
+    for (let attempt = 0; attempt < 20; attempt += 1) {
+      let generated = 'DOC-';
+      for (let i = 0; i < 6; i += 1) {
+        generated += alphabet[Math.floor(Math.random() * alphabet.length)];
+      }
+
+      const existing = await this.findDoctorByCode(generated);
+      if (!existing) return generated;
+    }
+
+    throw new Error('No se pudo generar codigo unico de doctor');
+  },
+
+  async findDoctorByCode(doctorCode) {
+    const normalized = normalizeDoctorCode(doctorCode);
+    if (!normalized) return undefined;
+
+    try {
+      const [rows] = await pool.execute(
+        'SELECT * FROM users WHERE role = ? AND doctor_code = ? LIMIT 1',
+        ['doctor', normalized]
+      );
+      if (!rows[0]) return undefined;
+      return this._decryptUser(rows[0]);
+    } catch {
+      return undefined;
+    }
+  },
+
+  async isPatientLinkedToDoctor(patientId, doctorId) {
+    try {
+      const [rows] = await pool.execute(
+        'SELECT id FROM users WHERE id = ? AND role = ? AND linked_doctor_id = ? LIMIT 1',
+        [patientId, 'patient', doctorId]
+      );
+      return Boolean(rows[0]);
+    } catch {
+      // En esquema viejo no existe relacion; mantener compatibilidad.
+      return true;
+    }
   },
 
 
-  async getAllPatients() {
+  async getAllPatients(doctorId = null) {
     try {
-      const [rows] = await pool.execute(
-        'SELECT id, name, email, date_of_birth, sex, created_at, patient_status, patient_status_reason, deleted_at FROM users WHERE role = ?',
-        ['patient']
-      );
+      const [rows] = doctorId
+        ? await pool.execute(
+          'SELECT id, name, email, date_of_birth, sex, created_at, patient_status, patient_status_reason, deleted_at, linked_doctor_id FROM users WHERE role = ? AND linked_doctor_id = ?',
+          ['patient', doctorId]
+        )
+        : await pool.execute(
+          'SELECT id, name, email, date_of_birth, sex, created_at, patient_status, patient_status_reason, deleted_at, linked_doctor_id FROM users WHERE role = ?',
+          ['patient']
+        );
       return rows.map(this._decryptUser);
     } catch {
       // Compatibilidad con esquemas anteriores donde aun no existen columnas de fase 2.
@@ -90,10 +174,18 @@ export const userModel = {
 
 
   async getAllDoctors() {
-    const [rows] = await pool.execute(
-      'SELECT id, name, email, created_at FROM users WHERE role = ?',
-      ['doctor']
-    );
+    let rows;
+    try {
+      [rows] = await pool.execute(
+        'SELECT id, name, email, doctor_code, created_at FROM users WHERE role = ?',
+        ['doctor']
+      );
+    } catch {
+      [rows] = await pool.execute(
+        'SELECT id, name, email, created_at FROM users WHERE role = ?',
+        ['doctor']
+      );
+    }
     return rows.map(this._decryptUser);
   },
 
@@ -277,6 +369,18 @@ export const userModel = {
     return Boolean(rows[0]);
   },
 
+  async existsPatientLinkedToDoctor(patientId, doctorId) {
+    try {
+      const [rows] = await pool.execute(
+        'SELECT id FROM users WHERE id = ? AND role = ? AND linked_doctor_id = ? LIMIT 1',
+        [patientId, 'patient', doctorId]
+      );
+      return Boolean(rows[0]);
+    } catch {
+      return this.existsPatientById(patientId);
+    }
+  },
+
   // Utilidad para desencriptar los campos de usuario
   _decryptUser(user) {
     return {
@@ -285,7 +389,9 @@ export const userModel = {
       email: safeDecrypt(user.email),
       role: safeDecrypt(user.role),
       date_of_birth: safeDecrypt(user.date_of_birth),
-      sex: safeDecrypt(user.sex)
+      sex: safeDecrypt(user.sex),
+      doctor_code: user.doctor_code || null,
+      linked_doctor_id: user.linked_doctor_id || null,
     };
   },
 

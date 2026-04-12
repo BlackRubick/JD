@@ -37,6 +37,11 @@ mysql -u root -p psybioneer < migrations/2026-04-08_phase1_test_instruments.sql
 mysql -u root -p psybioneer < migrations/2026-04-09_phase2_patient_profile_nom024.sql
 ```
 
+6. Aplicar migración de codigo de comunidad por doctor:
+```bash
+mysql -u root -p psybioneer < migrations/2026-04-11_phase3_doctor_community_code.sql
+```
+
 ## Iniciar el servidor
 
 ```bash

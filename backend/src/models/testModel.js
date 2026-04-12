@@ -143,13 +143,34 @@ export const testModel = {
     }));
   },
 
-  async getAllSessionsWithPatients() {
-    const [rows] = await pool.execute(
-      `SELECT ts.*, u.name as patient_name, u.email as patient_email
-       FROM test_sessions ts
-       JOIN users u ON ts.patient_id = u.id
-       ORDER BY ts.created_at DESC`
-    );
+  async getAllSessionsWithPatients(doctorId = null) {
+    let rows;
+    try {
+      if (doctorId) {
+        [rows] = await pool.execute(
+          `SELECT ts.*, u.name as patient_name, u.email as patient_email
+           FROM test_sessions ts
+           JOIN users u ON ts.patient_id = u.id
+           WHERE u.linked_doctor_id = ?
+           ORDER BY ts.created_at DESC`,
+          [doctorId]
+        );
+      } else {
+        [rows] = await pool.execute(
+          `SELECT ts.*, u.name as patient_name, u.email as patient_email
+           FROM test_sessions ts
+           JOIN users u ON ts.patient_id = u.id
+           ORDER BY ts.created_at DESC`
+        );
+      }
+    } catch {
+      [rows] = await pool.execute(
+        `SELECT ts.*, u.name as patient_name, u.email as patient_email
+         FROM test_sessions ts
+         JOIN users u ON ts.patient_id = u.id
+         ORDER BY ts.created_at DESC`
+      );
+    }
 
     const [feedbackRows] = await pool.execute(
       'SELECT test_session_id, COUNT(*) as feedback_count FROM feedback GROUP BY test_session_id'

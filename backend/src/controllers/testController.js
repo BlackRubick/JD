@@ -1,5 +1,6 @@
 import { testModel } from '../models/testModel.js';
 import { normalizeInstrument, isValidInstrument } from '../utils/instrumentCatalog.js';
+import { userModel } from '../models/userModel.js';
 
 export const testController = {
   async createSession(req, res) {
@@ -16,6 +17,13 @@ export const testController = {
 
       if (!patient_id) {
         return res.status(400).json({ error: 'patient_id es requerido para crear sesión' });
+      }
+
+      if (req.user.role === 'doctor') {
+        const isLinked = await userModel.isPatientLinkedToDoctor(patient_id, req.user.id);
+        if (!isLinked) {
+          return res.status(403).json({ error: 'No tienes acceso a este paciente' });
+        }
       }
 
       const inProgress = await testModel.getInProgressSessionByPatient(patient_id, instrument_code);
@@ -93,6 +101,14 @@ export const testController = {
   async getPatientSessions(req, res) {
     try {
       const patient_id = req.user.role === 'patient' ? req.user.id : req.params.patient_id;
+
+      if (req.user.role === 'doctor') {
+        const isLinked = await userModel.isPatientLinkedToDoctor(patient_id, req.user.id);
+        if (!isLinked) {
+          return res.status(403).json({ error: 'No tienes acceso a este paciente' });
+        }
+      }
+
       const sessions = await testModel.getSessionsByPatient(patient_id);
       res.json(sessions);
     } catch (error) {
@@ -113,7 +129,13 @@ export const testController = {
 
   async getPatientInstrumentStatuses(req, res) {
     try {
-      const statuses = await testModel.getPatientInstrumentStatuses(req.params.patient_id);
+      const patientId = req.params.patient_id;
+      const isLinked = await userModel.isPatientLinkedToDoctor(patientId, req.user.id);
+      if (!isLinked) {
+        return res.status(403).json({ error: 'No tienes acceso a este paciente' });
+      }
+
+      const statuses = await testModel.getPatientInstrumentStatuses(patientId);
       res.json(statuses);
     } catch (error) {
       console.error('Error al obtener estatus del paciente:', error);
@@ -123,7 +145,7 @@ export const testController = {
 
   async getAllSessions(req, res) {
     try {
-      const sessions = await testModel.getAllSessionsWithPatients();
+      const sessions = await testModel.getAllSessionsWithPatients(req.user.id);
       res.json(sessions);
     } catch (error) {
       console.error('Error al obtener todas las sesiones:', error);
@@ -144,6 +166,13 @@ export const testController = {
         return res.status(403).json({ error: 'No tienes permiso para ver esta sesión' });
       }
 
+      if (req.user.role === 'doctor') {
+        const isLinked = await userModel.isPatientLinkedToDoctor(session.patient_id, req.user.id);
+        if (!isLinked) {
+          return res.status(403).json({ error: 'No tienes acceso a esta sesión' });
+        }
+      }
+
       const responses = await testModel.getSessionResponses(session_id);
       const feedback = await testModel.getFeedback(session_id);
 
@@ -161,6 +190,16 @@ export const testController = {
   async addFeedback(req, res) {
     try {
       const { session_id, feedback_text } = req.body;
+
+      const session = await testModel.getSessionById(session_id);
+      if (!session) {
+        return res.status(404).json({ error: 'Sesión no encontrada' });
+      }
+
+      const isLinked = await userModel.isPatientLinkedToDoctor(session.patient_id, req.user.id);
+      if (!isLinked) {
+        return res.status(403).json({ error: 'No tienes acceso a este paciente' });
+      }
 
       const feedbackId = await testModel.addFeedback(
         session_id,

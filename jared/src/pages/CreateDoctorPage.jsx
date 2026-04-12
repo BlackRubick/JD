@@ -47,11 +47,15 @@ function CreateDoctorPage({ role, onLogout }) {
 
     try {
       const { confirmPassword, ...doctorData } = formData;
-      await userAPI.createDoctor(doctorData);
+      const response = await userAPI.createDoctor(doctorData);
 
       await Swal.fire({
         title: 'Doctor creado',
-        text: 'El nuevo doctor ha sido registrado exitosamente',
+        html: `
+          <p>El nuevo doctor ha sido registrado exitosamente.</p>
+          <p style="margin-top:8px;"><strong>Codigo de comunidad:</strong> ${response?.doctor?.doctor_code || 'No disponible'}</p>
+          <p style="font-size:0.85rem;color:#64748b;">Comparte este codigo con los pacientes para vincularlos a este especialista.</p>
+        `,
         icon: 'success',
         confirmButtonColor: '#0066cc'
       });
@@ -198,9 +202,8 @@ function CreateDoctorPage({ role, onLogout }) {
               <div>
                 <h4 style={{ margin: '0 0 0.5rem 0', color: '#856404' }}>Importante</h4>
                 <p style={{ margin: 0, fontSize: '0.9rem', color: '#856404', lineHeight: '1.6' }}>
-                  El nuevo doctor tendrá acceso completo al sistema, podrá ver todos los pacientes, 
-                  sus resultados y también crear otros doctores. Asegúrate de compartir las credenciales 
-                  de forma segura.
+                  El nuevo doctor tendra acceso a su propia comunidad de pacientes. Comparte de forma segura
+                  el codigo de comunidad generado para que los pacientes se vinculen solo con su especialista.
                 </p>
               </div>
             </div>

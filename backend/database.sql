@@ -8,6 +8,8 @@ CREATE TABLE IF NOT EXISTS users (
   email VARCHAR(255) UNIQUE NOT NULL,
   password VARCHAR(255) NOT NULL,
   role ENUM('patient', 'doctor') NOT NULL DEFAULT 'patient',
+  doctor_code VARCHAR(32) UNIQUE,
+  linked_doctor_id INT,
   date_of_birth DATE,
   sex VARCHAR(50),
   patient_status ENUM('active', 'inactive', 'discharged') NOT NULL DEFAULT 'active',
@@ -18,6 +20,7 @@ CREATE TABLE IF NOT EXISTS users (
   created_by INT,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  FOREIGN KEY (linked_doctor_id) REFERENCES users(id) ON DELETE SET NULL,
   FOREIGN KEY (patient_status_changed_by) REFERENCES users(id) ON DELETE SET NULL,
   FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL
 );

@@ -59,6 +59,11 @@ Aplicar migración de fase 2 (expediente clinico y estatus de pacientes):
 mysql -u root -p psybioneer < migrations/2026-04-09_phase2_patient_profile_nom024.sql
 ```
 
+Aplicar migración de fase 3 (codigo de comunidad por doctor):
+```bash
+mysql -u root -p psybioneer < migrations/2026-04-11_phase3_doctor_community_code.sql
+```
+
 ### 5. Generar hashes de contraseñas
 
 ```bash

@@ -11,6 +11,7 @@ function RegisterPage({ onLogin }) {
     name: '',
     date_of_birth: '',
     sex: '',
+    doctor_code: '',
     email: '',
     password: '',
     confirmPassword: ''
@@ -99,6 +100,18 @@ function RegisterPage({ onLogin }) {
               <option value="prefiero-no-decir">Prefiero no decirlo</option>
             </select>
           </div>
+        </div>
+        <div>
+          <label style={labelStyle}>Codigo de tu especialista</label>
+          <input
+            className="input"
+            name="doctor_code"
+            value={formData.doctor_code}
+            onChange={handleChange}
+            placeholder="Ej. DOC-AB12CD"
+            required
+            style={{ textTransform: 'uppercase' }}
+          />
         </div>
         <div>
           <label style={labelStyle}>Correo electrónico</label>
