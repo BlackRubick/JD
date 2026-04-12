@@ -61,6 +61,7 @@ export const userModel = {
 
   async create(userData) {
     const { name, email, password, role, date_of_birth, sex, created_by, doctor_code, linked_doctor_id } = userData;
+    const normalizedDob = date_of_birth ? String(date_of_birth).slice(0, 10) : null;
 
     try {
       const [result] = await pool.execute(
@@ -72,7 +73,7 @@ export const userModel = {
           normalizeEmail(email),
           password,
           role ?? 'patient',
-          date_of_birth ? encrypt(date_of_birth) : null,
+          normalizedDob,
           sex ? encrypt(sex) : null,
           created_by ?? null,
           doctor_code ? normalizeDoctorCode(doctor_code) : null,
@@ -89,7 +90,7 @@ export const userModel = {
           normalizeEmail(email),
           password,
           role ?? 'patient',
-          date_of_birth ? encrypt(date_of_birth) : null,
+          normalizedDob,
           sex ? encrypt(sex) : null,
           created_by ?? null,
         ]
