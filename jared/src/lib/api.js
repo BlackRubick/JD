@@ -109,17 +109,17 @@ export const questionAPI = {
     return apiRequest(`/questions?instrument=${encodeURIComponent(instrumentCode)}`);
   },
 
-  async create(text, instrumentCode = 'CESD') {
+  async create(text, instrumentCode = 'CESD', options = []) {
     return apiRequest('/questions', {
       method: 'POST',
-      body: JSON.stringify({ text, instrument: instrumentCode }),
+      body: JSON.stringify({ text, instrument: instrumentCode, options }),
     });
   },
 
-  async update(id, text, position) {
+  async update(id, text, position, options, instrumentCode = 'CESD') {
     return apiRequest(`/questions/${id}`, {
       method: 'PUT',
-      body: JSON.stringify({ text, position }),
+      body: JSON.stringify({ text, position, options, instrument: instrumentCode }),
     });
   },
 

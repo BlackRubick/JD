@@ -95,6 +95,24 @@ export const questionModel = {
     return result.insertId;
   },
 
+  async replaceAnswerOptions(questionId, options = []) {
+    await pool.execute('DELETE FROM answer_options WHERE question_id = ?', [questionId]);
+
+    for (let i = 0; i < options.length; i += 1) {
+      const option = options[i];
+      await pool.execute(
+        'INSERT INTO answer_options (question_id, label, value, score, position) VALUES (?, ?, ?, ?, ?)',
+        [
+          questionId,
+          encrypt(String(option.label || '').trim()),
+          Number(option.value),
+          Number(option.score),
+          i + 1,
+        ]
+      );
+    }
+  },
+
   async update(id, text, position) {
     await pool.execute(
       'UPDATE questions SET text = ?, position = ? WHERE id = ?',
