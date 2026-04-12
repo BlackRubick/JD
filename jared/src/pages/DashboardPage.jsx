@@ -70,7 +70,18 @@ function DashboardPage({ role, onLogout }) {
               <div key={m.label} className="stat-card" style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
                 <span style={{ fontSize: '1.8rem' }}>{m.icon}</span>
                 <div>
-                  <div className="serif" style={{ fontSize: '1.8rem', fontWeight: 900, color: 'var(--gold)' }}>{m.value}</div>
+                  <div
+                    style={{
+                      fontSize: '1.8rem',
+                      fontWeight: 700,
+                      color: 'var(--gold)',
+                      fontFamily: 'Georgia, "Times New Roman", Times, serif',
+                      fontVariantNumeric: 'lining-nums tabular-nums',
+                      letterSpacing: '0.01em'
+                    }}
+                  >
+                    {m.value}
+                  </div>
                   <div style={{ fontSize: '0.78rem', color: '#93c5fd' }}>{m.label}</div>
                 </div>
               </div>

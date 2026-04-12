@@ -159,10 +159,11 @@ function HomePage({ role, onLogout }) {
             {stats.map((s) => (
               <div key={s.value} className="stat-card" style={{ textAlign: 'center' }}>
                 <div style={{
-                  fontFamily: "'DM Sans', sans-serif",
+                  fontFamily: 'Georgia, "Times New Roman", Times, serif',
                   fontSize: '2.4rem',
                   fontWeight: 700,
-                  letterSpacing: '0',
+                  fontVariantNumeric: 'lining-nums tabular-nums',
+                  letterSpacing: '0.01em',
                   color: 'var(--gold)',
                   lineHeight: 1
                 }}>
