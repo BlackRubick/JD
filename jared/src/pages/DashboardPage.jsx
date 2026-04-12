@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import Swal from 'sweetalert2';
 import Shell from '../components/Shell';
-import { testAPI, userAPI } from '../lib/api';
+import { authAPI, testAPI, userAPI } from '../lib/api';
 
 function DashboardPage({ role, onLogout }) {
   const [stats, setStats] = useState({
@@ -11,6 +12,7 @@ function DashboardPage({ role, onLogout }) {
     avgScore: 0
   });
   const [recentTests, setRecentTests] = useState([]);
+  const [doctorCode, setDoctorCode] = useState('');
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -19,9 +21,10 @@ function DashboardPage({ role, onLogout }) {
 
   const loadDashboardData = async () => {
     try {
-      const [patients, tests] = await Promise.all([
+      const [patients, tests, profile] = await Promise.all([
         userAPI.getAllPatients(),
-        testAPI.getAllSessions()
+        testAPI.getAllSessions(),
+        authAPI.getProfile(),
       ]);
 
       const completedTests = tests.filter(t => t.status === 'completed');
@@ -43,10 +46,32 @@ function DashboardPage({ role, onLogout }) {
       });
 
       setRecentTests(tests.slice(0, 5));
+      setDoctorCode(profile?.doctor_code || '');
     } catch (error) {
       console.error('Error loading dashboard:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const copyDoctorCode = async () => {
+    if (!doctorCode) return;
+
+    try {
+      await navigator.clipboard.writeText(doctorCode);
+      await Swal.fire({
+        icon: 'success',
+        title: 'Codigo copiado',
+        text: 'Comparte este codigo con tus pacientes para que se registren contigo.',
+        timer: 1700,
+        showConfirmButton: false,
+      });
+    } catch {
+      await Swal.fire({
+        icon: 'error',
+        title: 'No se pudo copiar',
+        text: 'Copia manualmente el codigo mostrado.',
+      });
     }
   };
 
@@ -65,6 +90,27 @@ function DashboardPage({ role, onLogout }) {
             <h2 className="serif" style={{ fontSize: '2rem', fontWeight: 700, color: '#e2eaf8' }}>Dashboard</h2>
             <div style={{ width: 48, height: 3, background: 'linear-gradient(90deg, var(--gold), var(--accent))', borderRadius: 2, marginTop: 8 }} />
           </div>
+          {(role === 'therapist' || role === 'doctor') && doctorCode && (
+            <div className="card" style={{ padding: '18px 20px', marginBottom: 16, border: '1px solid #bfdbfe', background: 'linear-gradient(180deg, #f8fbff 0%, #eef6ff 100%)' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+                <div>
+                  <div style={{ fontSize: '0.82rem', color: '#1e3a8a', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                    Codigo de comunidad del doctor
+                  </div>
+                  <div style={{ marginTop: 4, fontSize: '1.25rem', fontWeight: 700, color: '#0f172a', fontFamily: 'Georgia, "Times New Roman", Times, serif' }}>
+                    {doctorCode}
+                  </div>
+                  <div style={{ marginTop: 4, fontSize: '0.8rem', color: '#475569' }}>
+                    Tus pacientes usan este codigo al registrarse para unirse contigo.
+                  </div>
+                </div>
+                <button className="btn-secondary" onClick={copyDoctorCode} style={{ padding: '0.55rem 0.9rem', fontSize: '0.82rem' }}>
+                  Copiar codigo
+                </button>
+              </div>
+            </div>
+          )}
+
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 16, marginBottom: 28 }}>
             {metrics.map((m) => (
               <div key={m.label} className="stat-card" style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
