@@ -17,10 +17,9 @@ function HomePage({ role, onLogout }) {
   };
 
   const features = [
-    { icon: '🧠', label: 'Intervención temprana sobre depresión' },
     { icon: '📋', label: 'Tests estandarizados' },
     { icon: '📊', label: 'Estadísticas de investigación' },
-    { icon: '💬', label: 'Chat de orientación' },
+    { icon: '💬', label: 'Preguntas frecuentes' },
   ];
 
   const stats = [
