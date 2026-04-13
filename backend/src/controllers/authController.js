@@ -5,7 +5,19 @@ import { userModel } from '../models/userModel.js';
 export const authController = {
   async register(req, res) {
     try {
-      const { name, email, password, date_of_birth, sex, doctor_code } = req.body;
+      const {
+        first_name,
+        last_name,
+        second_last_name,
+        curp,
+        email,
+        password,
+        date_of_birth,
+        sex,
+        nationality,
+        residence_inegi,
+        doctor_code
+      } = req.body;
 
       if (!doctor_code) {
         return res.status(400).json({ error: 'Debes ingresar el codigo del especialista' });
@@ -23,8 +35,10 @@ export const authController = {
 
       const hashedPassword = await bcrypt.hash(password, 10);
 
+      // Guardar nombre completo concatenado para compatibilidad, pero también los apellidos
+      const fullName = `${first_name} ${last_name} ${second_last_name}`.trim();
       const userId = await userModel.create({
-        name,
+        name: fullName,
         email,
         password: hashedPassword,
         role: 'patient',
@@ -32,6 +46,27 @@ export const authController = {
         sex: sex ?? null,
         linked_doctor_id: doctor.id,
         created_by: doctor.id,
+        first_name,
+        last_name,
+        second_last_name
+      });
+
+      // Guardar datos clínicos obligatorios
+      await userModel.upsertClinicalRecord(userId, {
+        curp,
+        gender: sex,
+        nationality,
+        birthplace: '',
+        address_line: '',
+        city: '',
+        state: '',
+        postal_code: '',
+        phone: '',
+        allergies: '',
+        chronic_conditions: '',
+        current_medications: '',
+        notes: '',
+        residence_inegi
       });
 
       const token = jwt.sign(

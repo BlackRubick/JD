@@ -28,6 +28,7 @@ const apiRequest = async (endpoint, options = {}) => {
 
 export const authAPI = {
   async register(userData) {
+    // Enviar todos los campos relevantes para el registro de paciente
     const data = await apiRequest('/auth/register', {
       method: 'POST',
       body: JSON.stringify(userData),

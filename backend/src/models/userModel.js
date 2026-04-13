@@ -60,14 +60,14 @@ export const userModel = {
 
 
   async create(userData) {
-    const { name, email, password, role, date_of_birth, sex, created_by, doctor_code, linked_doctor_id } = userData;
+    const { name, email, password, role, date_of_birth, sex, created_by, doctor_code, linked_doctor_id, first_name, last_name, second_last_name } = userData;
     const normalizedDob = date_of_birth ? String(date_of_birth).slice(0, 10) : null;
 
     try {
       const [result] = await pool.execute(
         `INSERT INTO users
-          (name, email, password, role, date_of_birth, sex, created_by, doctor_code, linked_doctor_id)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          (name, email, password, role, date_of_birth, sex, created_by, doctor_code, linked_doctor_id, first_name, last_name, second_last_name)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         [
           encrypt(name),
           normalizeEmail(email),
@@ -78,11 +78,14 @@ export const userModel = {
           created_by ?? null,
           doctor_code ? normalizeDoctorCode(doctor_code) : null,
           linked_doctor_id ?? null,
+          first_name ?? '',
+          last_name ?? '',
+          second_last_name ?? ''
         ]
       );
       return result.insertId;
     } catch {
-      // Compatibilidad con esquemas sin columnas doctor_code / linked_doctor_id.
+      // Compatibilidad con esquemas sin columnas doctor_code / linked_doctor_id / apellidos.
       const [result] = await pool.execute(
         'INSERT INTO users (name, email, password, role, date_of_birth, sex, created_by) VALUES (?, ?, ?, ?, ?, ?, ?)',
         [
@@ -294,14 +297,15 @@ export const userModel = {
       chronic_conditions: payload.chronic_conditions ?? '',
       current_medications: payload.current_medications ?? '',
       notes: payload.notes ?? '',
+      residence_inegi: payload.residence_inegi ?? ''
     };
 
     try {
       await pool.execute(
         `INSERT INTO patient_clinical_records
           (user_id, gender, curp, phone, birthplace, nationality, address_line, city, state, postal_code,
-           allergies, chronic_conditions, current_medications, notes)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+           allergies, chronic_conditions, current_medications, notes, residence_inegi)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
          ON DUPLICATE KEY UPDATE
            gender = VALUES(gender),
            curp = VALUES(curp),
@@ -316,6 +320,7 @@ export const userModel = {
            chronic_conditions = VALUES(chronic_conditions),
            current_medications = VALUES(current_medications),
            notes = VALUES(notes),
+           residence_inegi = VALUES(residence_inegi),
            updated_at = NOW()`,
         [
           patientId,
@@ -332,6 +337,7 @@ export const userModel = {
           encrypt(fields.chronic_conditions),
           encrypt(fields.current_medications),
           encrypt(fields.notes),
+          encrypt(fields.residence_inegi)
         ]
       );
     } catch {

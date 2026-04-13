@@ -8,9 +8,14 @@ function RegisterPage({ onLogin }) {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
-    name: '',
+    first_name: '',
+    last_name: '',
+    second_last_name: '',
+    curp: '',
     date_of_birth: '',
     sex: '',
+    nationality: '',
+    residence_inegi: '',
     doctor_code: '',
     email: '',
     password: '',
@@ -82,8 +87,22 @@ function RegisterPage({ onLogin }) {
     <AuthCard title="Crear cuenta" subtitle="Regístrate para comenzar tu evaluación">
       <form onSubmit={handleRegister} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
         <div>
-          <label style={labelStyle}>Nombre completo</label>
-          <input className="input" name="name" value={formData.name} onChange={handleChange} placeholder="Tu nombre" required />
+          <label style={labelStyle}>CURP</label>
+          <input className="input" name="curp" value={formData.curp} onChange={handleChange} placeholder="Ej. ABCD123456HDFLRS09" required maxLength={18} style={{ textTransform: 'uppercase' }} />
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+          <div>
+            <label style={labelStyle}>Nombre(s)</label>
+            <input className="input" name="first_name" value={formData.first_name} onChange={handleChange} placeholder="Nombre(s)" required />
+          </div>
+          <div>
+            <label style={labelStyle}>Primer apellido</label>
+            <input className="input" name="last_name" value={formData.last_name} onChange={handleChange} placeholder="Primer apellido" required />
+          </div>
+          <div>
+            <label style={labelStyle}>Segundo apellido</label>
+            <input className="input" name="second_last_name" value={formData.second_last_name} onChange={handleChange} placeholder="Segundo apellido" required />
+          </div>
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
           <div>
@@ -99,6 +118,16 @@ function RegisterPage({ onLogin }) {
               <option value="otro">Otro</option>
               <option value="prefiero-no-decir">Prefiero no decirlo</option>
             </select>
+          </div>
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+          <div>
+            <label style={labelStyle}>Nacionalidad</label>
+            <input className="input" name="nationality" value={formData.nationality} onChange={handleChange} placeholder="Ej. Mexicana" required />
+          </div>
+          <div>
+            <label style={labelStyle}>Lugar de residencia (clave INEGI)</label>
+            <input className="input" name="residence_inegi" value={formData.residence_inegi} onChange={handleChange} placeholder="Clave INEGI" required />
           </div>
         </div>
         <div>
