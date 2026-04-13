@@ -79,11 +79,7 @@ function DashboardPage({ role, onLogout }) {
         sel.removeAllRanges();
         sel.addRange(range);
       }
-      await Swal.fire({
-        icon: 'error',
-        title: 'No se pudo copiar',
-        text: 'Selecciona y copia manualmente el codigo mostrado.',
-      });
+      // Ya no mostrar alerta de error
     }
   };
 
