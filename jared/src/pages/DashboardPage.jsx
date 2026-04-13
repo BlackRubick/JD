@@ -14,6 +14,7 @@ function DashboardPage({ role, onLogout }) {
   const [recentTests, setRecentTests] = useState([]);
   const [doctorCode, setDoctorCode] = useState('');
   const [loading, setLoading] = useState(true);
+  const [showCopyFallback, setShowCopyFallback] = useState(false);
 
   useEffect(() => {
     loadDashboardData();
@@ -23,7 +24,6 @@ function DashboardPage({ role, onLogout }) {
     try {
       const [patients, tests, profile] = await Promise.all([
         userAPI.getAllPatients(),
-  const [showCopyFallback, setShowCopyFallback] = useState(false);
         testAPI.getAllSessions(),
         authAPI.getProfile(),
       ]);
