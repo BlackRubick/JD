@@ -3,6 +3,39 @@ import Swal from 'sweetalert2';
 import Shell from '../components/Shell';
 
 function HomePage({ role, onLogout }) {
+    const handleShowFAQ = () => {
+      Swal.fire({
+        title: 'Preguntas Frecuentes (FAQ)',
+        html: `
+  <div style='text-align:left;font-size:1rem;'>
+  <b>1. ¿Qué es una preevaluación psicológica y para qué sirve?</b><br>
+  Es una herramienta de cribado inicial que ayuda a identificar indicadores o síntomas relacionados con la salud mental. Su objetivo no es dar un diagnóstico definitivo, sino ofrecer una orientación preliminar al buscar el apoyo de un profesional especializado.<br><br>
+
+  <b>2. ¿Esta evaluación sustituye una consulta con un psicólogo?</b><br>
+  No. Los resultados obtenidos son de carácter informativo y estadístico. Un diagnóstico clínico formal solo puede ser realizado por un psicólogo o psiquiatra colegiado a través de entrevistas y pruebas clínicas estandarizadas.<br><br>
+
+  <b>3. ¿Quién tendrá acceso a mis respuestas?</b><br>
+  Los datos están protegidos bajo protocolos de confidencialidad y solo serán utilizados con fines de análisis dentro del proyecto, garantizando que la información sensible no sea compartida con terceros sin tu consentimiento explícito.<br><br>
+
+  <b>4. ¿Cuánto tiempo toma completar la evaluación?</b><br>
+  El tiempo estimado es de entre 10 a 15 minutos. Te recomendamos realizarla en un lugar tranquilo y sin interrupciones para que tus respuestas sean lo más sinceras y precisas posible.<br><br>
+
+  <b>5. ¿Qué significan mis resultados?</b><br>
+  Al finalizar, recibirás un reporte con una interpretación basada en escalas validadas. Un resultado "alto" en ciertos indicadores no significa una patología, sino una señal de alerta que sugiere que podrías beneficiarte de una conversación con un especialista.<br><br>
+
+  <b>6. ¿Tiene algún costo utilizar esta plataforma?</b><br>
+  No, la plataforma es completamente gratuita y forma parte de una iniciativa de innovación tecnológica para facilitar el acceso a herramientas de salud mental.<br><br>
+
+  <b>7. ¿Qué debo hacer si me encuentro en una situación de crisis inmediata?</b><br>
+  Nuestra plataforma no es un servicio de atención de emergencias. Si sientes que tú o alguien más está en peligro inmediato, por favor comunícate a las líneas de ayuda locales (como el 911 o 800 911 2000) o acude al centro de salud más cercano.
+  </div>
+  `,
+        width: 700,
+        confirmButtonText: 'Cerrar',
+        confirmButtonColor: '#2563eb',
+        customClass: { popup: 'faq-modal' }
+      });
+    };
   const navigate = useNavigate();
 
   const handleStartEvaluation = async (instrumentCode = 'CESD') => {
@@ -19,7 +52,7 @@ function HomePage({ role, onLogout }) {
   const features = [
     { icon: '📋', label: 'Tests estandarizados' },
     { icon: '📊', label: 'Estadísticas de investigación' },
-    { icon: '💬', label: 'Preguntas frecuentes' },
+    { icon: '💬', label: 'Preguntas frecuentes', onClick: handleShowFAQ },
   ];
 
   const stats = [
@@ -76,7 +109,12 @@ function HomePage({ role, onLogout }) {
           display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 12,
         }}>
           {features.map((f) => (
-            <div key={f.label} className="badge-pill" style={{ borderRadius: 12, padding: '12px 16px' }}>
+            <div
+              key={f.label}
+              className="badge-pill"
+              style={{ borderRadius: 12, padding: '12px 16px', cursor: f.onClick ? 'pointer' : 'default' }}
+              onClick={f.onClick}
+            >
               <span style={{ fontSize: '1.1rem' }}>{f.icon}</span>
               <span style={{ fontSize: '0.82rem' }}>{f.label}</span>
             </div>
