@@ -283,6 +283,7 @@ export const userModel = {
   },
 
   async upsertClinicalRecord(patientId, payload) {
+    console.log('upsertClinicalRecord payload:', JSON.stringify(payload, null, 2));
     const fields = {
       gender: payload.gender ?? '',
       curp: payload.curp ?? '',
