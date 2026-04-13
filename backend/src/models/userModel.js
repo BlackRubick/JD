@@ -239,7 +239,7 @@ export const userModel = {
         `SELECT user_id, gender, curp, phone, birthplace, nationality,
                 address_line, city, state, postal_code,
                 allergies, chronic_conditions, current_medications, notes,
-                updated_at
+                residence_inegi, updated_at
          FROM patient_clinical_records
          WHERE user_id = ?`,
         [patientId]
@@ -423,6 +423,7 @@ export const userModel = {
       chronic_conditions: safeDecrypt(record.chronic_conditions),
       current_medications: safeDecrypt(record.current_medications),
       notes: safeDecrypt(record.notes),
+      residence_inegi: safeDecrypt(record.residence_inegi),
     };
   }
 };

@@ -19,6 +19,10 @@ function PatientsPage({ role, onLogout }) {
     phone: '',
     birthplace: '',
     nationality: '',
+    residence_inegi: '',
+    first_name: '',
+    last_name: '',
+    second_last_name: '',
     address_line: '',
     city: '',
     state: '',
@@ -72,6 +76,10 @@ function PatientsPage({ role, onLogout }) {
         phone: patient.clinical_record?.phone || '',
         birthplace: patient.clinical_record?.birthplace || '',
         nationality: patient.clinical_record?.nationality || '',
+        residence_inegi: patient.clinical_record?.residence_inegi || '',
+        first_name: patient.first_name || '',
+        last_name: patient.last_name || '',
+        second_last_name: patient.second_last_name || '',
         address_line: patient.clinical_record?.address_line || '',
         city: patient.clinical_record?.city || '',
         state: patient.clinical_record?.state || '',
@@ -358,11 +366,15 @@ function PatientsPage({ role, onLogout }) {
                     <div style={{ borderTop: '1px solid #e2e8f0', marginTop: 6, paddingTop: 10 }}>
                       <h4 style={{ margin: '0 0 8px 0', color: '#0f172a' }}>Expediente clinico (NOM-024)</h4>
                       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+                        <input className="input" placeholder="Nombre(s)" value={recordForm.first_name} onChange={(e) => handleRecordChange('first_name', e.target.value)} />
+                        <input className="input" placeholder="Primer apellido" value={recordForm.last_name} onChange={(e) => handleRecordChange('last_name', e.target.value)} />
+                        <input className="input" placeholder="Segundo apellido" value={recordForm.second_last_name} onChange={(e) => handleRecordChange('second_last_name', e.target.value)} />
                         <input className="input" placeholder="Genero" value={recordForm.gender} onChange={(e) => handleRecordChange('gender', e.target.value)} />
                         <input className="input" placeholder="CURP" value={recordForm.curp} onChange={(e) => handleRecordChange('curp', e.target.value)} />
                         <input className="input" placeholder="Telefono" value={recordForm.phone} onChange={(e) => handleRecordChange('phone', e.target.value)} />
                         <input className="input" placeholder="Nacionalidad" value={recordForm.nationality} onChange={(e) => handleRecordChange('nationality', e.target.value)} />
                         <input className="input" placeholder="Lugar de nacimiento" value={recordForm.birthplace} onChange={(e) => handleRecordChange('birthplace', e.target.value)} />
+                        <input className="input" placeholder="Lugar de residencia (INEGI)" value={recordForm.residence_inegi} onChange={(e) => handleRecordChange('residence_inegi', e.target.value)} />
                         <input className="input" placeholder="Codigo postal" value={recordForm.postal_code} onChange={(e) => handleRecordChange('postal_code', e.target.value)} />
                         <input className="input" placeholder="Estado" value={recordForm.state} onChange={(e) => handleRecordChange('state', e.target.value)} />
                         <input className="input" placeholder="Ciudad" value={recordForm.city} onChange={(e) => handleRecordChange('city', e.target.value)} />
