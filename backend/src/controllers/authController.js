@@ -78,7 +78,7 @@ export const authController = {
       res.status(201).json({
         message: 'Usuario registrado exitosamente',
         token,
-        user: { id: userId, name, email, role: 'patient', linked_doctor_id: doctor.id }
+        user: { id: userId, name: fullName, email, role: 'patient', linked_doctor_id: doctor.id }
       });
     } catch (error) {
       console.error('Error en registro:', error);
