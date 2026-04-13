@@ -67,10 +67,20 @@ function DashboardPage({ role, onLogout }) {
         showConfirmButton: false,
       });
     } catch {
+      // Fallback: seleccionar el texto automáticamente
+      const el = document.getElementById('doctor-code-text');
+      if (el) {
+        // Crear un rango y seleccionar el texto
+        const range = document.createRange();
+        range.selectNodeContents(el);
+        const sel = window.getSelection();
+        sel.removeAllRanges();
+        sel.addRange(range);
+      }
       await Swal.fire({
         icon: 'error',
         title: 'No se pudo copiar',
-        text: 'Copia manualmente el codigo mostrado.',
+        text: 'Selecciona y copia manualmente el codigo mostrado.',
       });
     }
   };
@@ -97,7 +107,7 @@ function DashboardPage({ role, onLogout }) {
                   <div style={{ fontSize: '0.82rem', color: '#1e3a8a', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
                     Codigo de comunidad del doctor
                   </div>
-                  <div style={{ marginTop: 4, fontSize: '1.25rem', fontWeight: 700, color: '#0f172a', fontFamily: 'Georgia, "Times New Roman", Times, serif' }}>
+                  <div id="doctor-code-text" style={{ marginTop: 4, fontSize: '1.25rem', fontWeight: 700, color: '#0f172a', fontFamily: 'Georgia, "Times New Roman", Times, serif', userSelect: 'all', cursor: 'pointer' }}>
                     {doctorCode}
                   </div>
                   <div style={{ marginTop: 4, fontSize: '0.8rem', color: '#475569' }}>
