@@ -49,6 +49,7 @@ function DashboardPage({ role, onLogout }) {
       setRecentTests(tests.slice(0, 5));
       setDoctorCode(profile?.doctor_code || '');
     } catch (error) {
+
       console.error('Error loading dashboard:', error);
     } finally {
       setLoading(false);
@@ -108,20 +109,19 @@ function DashboardPage({ role, onLogout }) {
                   <div style={{ fontSize: '0.82rem', color: '#1e3a8a', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
                     Codigo de comunidad del doctor
                   </div>
-                  <div id="doctor-code-text" style={{ marginTop: 4, fontSize: '1.25rem', fontWeight: 700, color: '#0f172a', fontFamily: 'Georgia, "Times New Roman", Times, serif', userSelect: 'all', cursor: 'pointer' }}>
+                  <div id="doctor-code-text" style={{ marginTop: 4, fontSize: '1.25rem', fontWeight: 700, color: '#0f172a', fontFamily: 'Georgia, \"Times New Roman\", Times, serif', userSelect: 'all', cursor: 'pointer', display: 'inline-block' }}>
                     {doctorCode}
                   </div>
+                  {showCopyFallback && (
+                    <div style={{ marginTop: 6, color: '#2563eb', background: '#e0e7ff', borderRadius: 4, padding: '4px 10px', fontSize: '0.92rem', fontWeight: 500, display: 'inline-block' }}>
+                      Selecciona y copia el código manualmente (Ctrl+C)
+                    </div>
+                  )}
                   <div style={{ marginTop: 4, fontSize: '0.8rem', color: '#475569' }}>
                     Tus pacientes usan este codigo al registrarse para unirse contigo.
-                  <div>
-                    <div id="doctor-code-text" style={{ marginTop: 4, fontSize: '1.25rem', fontWeight: 700, color: '#0f172a', fontFamily: 'Georgia, "Times New Roman", Times, serif', userSelect: 'all', cursor: 'pointer', display: 'inline-block' }}>
+                  </div>
                 </div>
                 <button className="btn-secondary" onClick={copyDoctorCode} style={{ padding: '0.55rem 0.9rem', fontSize: '0.82rem' }}>
-                    {showCopyFallback && (
-                      <div style={{ marginTop: 6, color: '#2563eb', background: '#e0e7ff', borderRadius: 4, padding: '4px 10px', fontSize: '0.92rem', fontWeight: 500, display: 'inline-block' }}>
-                        Selecciona y copia el código manualmente (Ctrl+C)
-                      </div>
-                    )}
                   Copiar codigo
                 </button>
               </div>
@@ -218,7 +218,6 @@ function DashboardPage({ role, onLogout }) {
             </Link>
           </div>
         </div>
-      </div> {/* Cierre del div principal */}
     </main>
   </Shell>
   );
