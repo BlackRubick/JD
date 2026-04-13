@@ -218,8 +218,9 @@ function DashboardPage({ role, onLogout }) {
             </Link>
           </div>
         </div>
-      </main>
-    </Shell>
+      </div> {/* Cierre del div principal */}
+    </main>
+  </Shell>
   );
 }
 
