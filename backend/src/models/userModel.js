@@ -300,6 +300,25 @@ export const userModel = {
       residence_inegi: payload.residence_inegi ?? ''
     };
 
+    // Actualizar nombre(s) y apellidos en users si vienen en el payload
+    if (payload.first_name || payload.last_name || payload.second_last_name) {
+      const [user] = await pool.execute(
+        'SELECT name FROM users WHERE id = ?',
+        [patientId]
+      );
+      const fullName = `${payload.first_name || ''} ${payload.last_name || ''} ${payload.second_last_name || ''}`.trim();
+      await pool.execute(
+        'UPDATE users SET first_name = ?, last_name = ?, second_last_name = ?, name = ? WHERE id = ?',
+        [
+          payload.first_name ?? '',
+          payload.last_name ?? '',
+          payload.second_last_name ?? '',
+          fullName,
+          patientId
+        ]
+      );
+    }
+
     try {
       await pool.execute(
         `INSERT INTO patient_clinical_records
