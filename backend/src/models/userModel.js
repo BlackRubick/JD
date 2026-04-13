@@ -320,50 +320,49 @@ export const userModel = {
       );
     }
 
-    try {
-      await pool.execute(
-        `INSERT INTO patient_clinical_records
-          (user_id, gender, curp, phone, birthplace, nationality, address_line, city, state, postal_code,
-           allergies, chronic_conditions, current_medications, notes, residence_inegi)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-         ON DUPLICATE KEY UPDATE
-           gender = VALUES(gender),
-           curp = VALUES(curp),
-           phone = VALUES(phone),
-           birthplace = VALUES(birthplace),
-           nationality = VALUES(nationality),
-           address_line = VALUES(address_line),
-           city = VALUES(city),
-           state = VALUES(state),
-           postal_code = VALUES(postal_code),
-           allergies = VALUES(allergies),
-           chronic_conditions = VALUES(chronic_conditions),
-           current_medications = VALUES(current_medications),
-           notes = VALUES(notes),
-           residence_inegi = VALUES(residence_inegi),
-           updated_at = NOW()`,
-        [
-          patientId,
-          encrypt(fields.gender),
-          encrypt(fields.curp),
-          encrypt(fields.phone),
-          encrypt(fields.birthplace),
-          encrypt(fields.nationality),
-          encrypt(fields.address_line),
-          encrypt(fields.city),
-          encrypt(fields.state),
-          encrypt(fields.postal_code),
-          encrypt(fields.allergies),
-          encrypt(fields.chronic_conditions),
-          encrypt(fields.current_medications),
-          encrypt(fields.notes),
-          encrypt(fields.residence_inegi)
-        ]
-      );
-    } catch {
-      // Compatibilidad: si falta tabla de expediente, no romper flujo base.
-      return;
-    }
+      try {
+        await pool.execute(
+          `INSERT INTO patient_clinical_records
+            (user_id, gender, curp, phone, birthplace, nationality, address_line, city, state, postal_code,
+             allergies, chronic_conditions, current_medications, notes, residence_inegi)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+           ON DUPLICATE KEY UPDATE
+             gender = VALUES(gender),
+             curp = VALUES(curp),
+             phone = VALUES(phone),
+             birthplace = VALUES(birthplace),
+             nationality = VALUES(nationality),
+             address_line = VALUES(address_line),
+             city = VALUES(city),
+             state = VALUES(state),
+             postal_code = VALUES(postal_code),
+             allergies = VALUES(allergies),
+             chronic_conditions = VALUES(chronic_conditions),
+             current_medications = VALUES(current_medications),
+             notes = VALUES(notes),
+             residence_inegi = VALUES(residence_inegi),
+             updated_at = NOW()`,
+          [
+            patientId,
+            encrypt(fields.gender),
+            encrypt(fields.curp),
+            encrypt(fields.phone),
+            encrypt(fields.birthplace),
+            encrypt(fields.nationality),
+            encrypt(fields.address_line),
+            encrypt(fields.city),
+            encrypt(fields.state),
+            encrypt(fields.postal_code),
+            encrypt(fields.allergies),
+            encrypt(fields.chronic_conditions),
+            encrypt(fields.current_medications),
+            encrypt(fields.notes),
+            encrypt(fields.residence_inegi)
+          ]
+        );
+      } catch (e) {
+        console.error('Error al guardar expediente clínico:', e);
+      }
   },
 
   async updatePatientStatus(patientId, status, reason, doctorId) {
