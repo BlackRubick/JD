@@ -3,9 +3,7 @@ import InnerPage from '../components/InnerPage';
 
 function ResourcesPage({ role, onLogout }) {
   const resources = [
-    { title: 'Manejo de ansiedad', desc: 'Técnicas de respiración y mindfulness para reducir el estrés.', icon: '🌿', tag: 'Bienestar' },
-    { title: 'Hábitos de sueño', desc: 'Guía para mejorar la calidad del sueño durante épocas de exámenes.', icon: '🌙', tag: 'Autocuidado' },
-    { title: 'Líneas de apoyo', desc: 'Directorio de servicios de salud mental disponibles en tu institución.', icon: '📞', tag: 'Urgencias' },
+    { title: 'Líneas de apoyo', desc: 'Línea de la Vida 800 911 2000', icon: '📞', tag: 'Urgencias' },
   ];
 
   return (
