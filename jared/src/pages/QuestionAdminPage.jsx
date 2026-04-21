@@ -71,6 +71,18 @@ function QuestionAdminPage({ role, onLogout }) {
   const [newOptions, setNewOptions] = useState(cloneTemplate(DEFAULT_TEMPLATE_BY_INSTRUMENT.CESD));
   const [loading, setLoading] = useState(true);
 
+  useEffect(() => {
+    loadQuestions();
+    // eslint-disable-next-line
+  }, [selectedInstrument]);
+
+  useEffect(() => {
+    const templateKey = DEFAULT_TEMPLATE_BY_INSTRUMENT[selectedInstrument] || 'CESD_4';
+    setSelectedTemplate(templateKey);
+    setNewOptions(cloneTemplate(templateKey));
+    // eslint-disable-next-line
+  }, [selectedInstrument]);
+
   // Solo permitir acceso si es la cuenta principal
   if (window.localStorage.getItem('psybioneer-email') !== 'doctor@psybioneer.com') {
     return (
@@ -83,16 +95,6 @@ function QuestionAdminPage({ role, onLogout }) {
       </Shell>
     );
   }
-
-  useEffect(() => {
-    loadQuestions();
-  }, [selectedInstrument]);
-
-  useEffect(() => {
-    const templateKey = DEFAULT_TEMPLATE_BY_INSTRUMENT[selectedInstrument] || 'CESD_4';
-    setSelectedTemplate(templateKey);
-    setNewOptions(cloneTemplate(templateKey));
-  }, [selectedInstrument]);
 
   const loadQuestions = async () => {
     try {
