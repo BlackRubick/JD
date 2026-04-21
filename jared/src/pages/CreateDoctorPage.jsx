@@ -5,6 +5,18 @@ import InnerPage from '../components/InnerPage';
 import { userAPI } from '../lib/api';
 
 function CreateDoctorPage({ role, onLogout }) {
+  // Solo permitir acceso si es la cuenta principal
+  if (window.localStorage.getItem('psybioneer-email') !== 'doctor@psybioneer.com') {
+    return (
+      <Shell role={role} onLogout={onLogout}>
+        <InnerPage title="Acceso restringido" subtitle="Solo el psicólogo principal puede crear psicólogos." icon="🔒">
+          <div style={{ padding: '2rem', textAlign: 'center', color: '#ef4444', fontWeight: 600 }}>
+            No tienes permiso para acceder a esta sección.
+          </div>
+        </InnerPage>
+      </Shell>
+    );
+  }
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -89,9 +101,9 @@ function CreateDoctorPage({ role, onLogout }) {
   return (
     <Shell role={role} onLogout={onLogout}>
       <InnerPage 
-        title="Crear Nuevo Doctor" 
-        subtitle="Agrega un nuevo terapeuta al sistema"
-        icon="👨‍⚕️"
+        title="Crear Nuevo Psicólogo" 
+        subtitle="Agrega un nuevo psicólogo al sistema"
+        icon="🧑‍⚕️"
       >
         <div style={{ padding: '2rem', maxWidth: '600px', margin: '0 auto' }}>
           <div className="card" style={{ padding: '2rem' }}>
@@ -103,7 +115,7 @@ function CreateDoctorPage({ role, onLogout }) {
                   name="name"
                   value={formData.name}
                   onChange={handleChange}
-                  placeholder="Nombre del doctor"
+                  placeholder="Nombre del psicólogo"
                   required
                   style={{
                     padding: '0.75rem',
@@ -123,7 +135,7 @@ function CreateDoctorPage({ role, onLogout }) {
                   name="email"
                   value={formData.email}
                   onChange={handleChange}
-                  placeholder="doctor@psybioneer.com"
+                  placeholder="psicologo@psybioneer.com"
                   required
                   style={{
                     padding: '0.75rem',
@@ -186,7 +198,7 @@ function CreateDoctorPage({ role, onLogout }) {
                   fontSize: '1rem'
                 }}
               >
-                {loading ? 'Creando doctor...' : 'Crear doctor'}
+                {loading ? 'Creando psicólogo...' : 'Crear psicólogo'}
               </button>
             </form>
           </div>
@@ -202,8 +214,8 @@ function CreateDoctorPage({ role, onLogout }) {
               <div>
                 <h4 style={{ margin: '0 0 0.5rem 0', color: '#856404' }}>Importante</h4>
                 <p style={{ margin: 0, fontSize: '0.9rem', color: '#856404', lineHeight: '1.6' }}>
-                  El nuevo doctor tendra acceso a su propia comunidad de pacientes. Comparte de forma segura
-                  el codigo de comunidad generado para que los pacientes se vinculen solo con su especialista.
+                  El nuevo psicólogo tendrá acceso a su propia comunidad de pacientes. Comparte de forma segura
+                  el código de comunidad generado para que los pacientes se vinculen solo con su especialista.
                 </p>
               </div>
             </div>

@@ -82,8 +82,12 @@ function Shell({ children, role, onLogout }) {
               <>
                 <Link to="/dashboard" className="nav-link">Dashboard</Link>
                 <Link to="/patients" className="nav-link">Pacientes</Link>
-                <Link to="/admin/questions" className="nav-link">⚙️ Preguntas</Link>
-                <Link to="/admin/create-doctor" className="nav-link">👨‍⚕️ Crear Doctor</Link>
+                {window.localStorage.getItem('psybioneer-email') === 'doctor@psybioneer.com' && (
+                  <>
+                    <Link to="/admin/questions" className="nav-link">⚙️ Preguntas</Link>
+                    <Link to="/admin/create-doctor" className="nav-link">🧑‍⚕️ Crear Psicólogo</Link>
+                  </>
+                )}
               </>
             )}
           </nav>
@@ -102,7 +106,7 @@ function Shell({ children, role, onLogout }) {
                   background: '#eff6ff', border: '1px solid #bfdbfe',
                   borderRadius: 999, padding: '4px 12px',
                 }}>
-                  {role === 'therapist' ? '🩺 Terapeuta' : '👤 Paciente'}
+                  {role === 'therapist' ? '🧑‍⚕️ Psicólogo' : '👤 Paciente'}
                 </span>
                 <button className="btn-ghost" onClick={onLogout} style={{ padding: '8px 16px', fontSize: '0.8rem' }}>
                   Salir

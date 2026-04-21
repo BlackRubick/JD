@@ -337,9 +337,7 @@ En conjunto, los instrumentos utilizados presentan:<br>
             ))}
           </div>
           <div style={{ textAlign: 'center' }}>
-            <button className="btn-primary" onClick={handleStartEvaluation} style={{ padding: '14px 36px', fontSize: '1rem' }}>
-                  Iniciar CES-D →
-            </button>
+
           </div>
         </div>
       </section>

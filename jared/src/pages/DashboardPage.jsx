@@ -103,7 +103,7 @@ function DashboardPage({ role, onLogout }) {
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
                 <div>
                   <div style={{ fontSize: '0.82rem', color: '#1e3a8a', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                    Codigo de comunidad del doctor
+                    Código de comunidad del psicólogo
                   </div>
                   <div id="doctor-code-text" style={{ marginTop: 4, fontSize: '1.25rem', fontWeight: 700, color: '#0f172a', fontFamily: 'Georgia, \"Times New Roman\", Times, serif', userSelect: 'all', cursor: 'pointer', display: 'inline-block' }}>
                     {doctorCode}
@@ -114,11 +114,11 @@ function DashboardPage({ role, onLogout }) {
                     </div>
                   )}
                   <div style={{ marginTop: 4, fontSize: '0.8rem', color: '#475569' }}>
-                    Tus pacientes usan este codigo al registrarse para unirse contigo.
+                    Tus pacientes usan este código al registrarse para unirse contigo.
                   </div>
                 </div>
                 <button className="btn-secondary" onClick={copyDoctorCode} style={{ padding: '0.55rem 0.9rem', fontSize: '0.82rem' }}>
-                  Copiar codigo
+                  Copiar código
                 </button>
               </div>
             </div>

@@ -60,6 +60,18 @@ function sanitizeOptionsForSave(options) {
 }
 
 function QuestionAdminPage({ role, onLogout }) {
+  // Solo permitir acceso si es la cuenta principal
+  if (window.localStorage.getItem('psybioneer-email') !== 'doctor@psybioneer.com') {
+    return (
+      <Shell role={role} onLogout={onLogout}>
+        <InnerPage title="Acceso restringido" subtitle="Solo el psicólogo principal puede editar preguntas." icon="🔒">
+          <div style={{ padding: '2rem', textAlign: 'center', color: '#ef4444', fontWeight: 600 }}>
+            No tienes permiso para acceder a esta sección.
+          </div>
+        </InnerPage>
+      </Shell>
+    );
+  }
   const [questions, setQuestions] = useState([]);
   const [editingId, setEditingId] = useState(null);
   const [editText, setEditText] = useState('');

@@ -16,18 +16,17 @@ function LoginPage({ role, onLogin }) {
 
     try {
       const data = await authAPI.login({ email, password });
-      
       const selectedRole = data.user.role === 'doctor' ? 'therapist' : 'patient';
+      // Guardar email para control de permisos
+      window.localStorage.setItem('psybioneer-email', data.user.email);
       onLogin(selectedRole);
-      
       await Swal.fire({
         icon: 'success',
         title: '¡Bienvenido!',
-        text: selectedRole === 'therapist' ? 'Ingresaste como terapeuta.' : 'Ingresaste como paciente.',
+        text: selectedRole === 'therapist' ? 'Ingresaste como psicólogo.' : 'Ingresaste como paciente.',
         timer: 1400,
         showConfirmButton: false,
       });
-      
       navigate(selectedRole === 'therapist' ? '/dashboard' : '/');
     } catch (error) {
       await Swal.fire({
