@@ -12,16 +12,11 @@ import MyTestsPage from '../pages/MyTestsPage';
 import CreateDoctorPage from '../pages/CreateDoctorPage';
 import PrivacyPolicyPage from '../pages/PrivacyPolicyPage';
 import DeleteAccountPage from '../pages/DeleteAccountPage';
+
 import { AuthRoute, TherapistRoute, PatientRoute } from './Guards';
 
-  // Guardar el email en localStorage al iniciar sesión (si no está)
-  // Esto debe hacerse en LoginPage, pero aquí lo forzamos por si acaso
-  if (window.localStorage.getItem('psybioneer-email') == null && role === 'therapist') {
-    // No hay email, forzar logout
-    window.localStorage.removeItem('psybioneer-token');
-    window.localStorage.removeItem('psybioneer-role');
-    window.location.reload();
-  }
+function AppRoutes({ role, onLogin, onLogout }) {
+
   return (
     <Routes>
       <Route path="/" element={<HomePage role={role} onLogout={onLogout} />} />
@@ -90,6 +85,7 @@ import { AuthRoute, TherapistRoute, PatientRoute } from './Guards';
       />
       <Route path="/privacy" element={<PrivacyPolicyPage role={role} onLogout={onLogout} />} />
       <Route path="/resources" element={<ResourcesPage role={role} onLogout={onLogout} />} />
+
     </Routes>
   );
 }
