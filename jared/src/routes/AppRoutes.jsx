@@ -19,7 +19,11 @@ function AppRoutes({ role, onLogin, onLogout }) {
 
   return (
     <Routes>
-      <Route path="/" element={<HomePage role={role} onLogout={onLogout} />} />
+      <Route path="/" element={
+        role === 'patient'
+          ? <TestPage role={role} onLogout={onLogout} />
+          : <HomePage role={role} onLogout={onLogout} />
+      } />
       <Route path="/login" element={<LoginPage role={role} onLogin={onLogin} />} />
       <Route path="/register" element={<RegisterPage role={role} onLogin={onLogin} />} />
       <Route path="/delete-account" element={<DeleteAccountPage />} />
