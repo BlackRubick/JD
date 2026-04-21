@@ -60,6 +60,17 @@ function sanitizeOptionsForSave(options) {
 }
 
 function QuestionAdminPage({ role, onLogout }) {
+  const [questions, setQuestions] = useState([]);
+  const [editingId, setEditingId] = useState(null);
+  const [editText, setEditText] = useState('');
+  const [editTemplate, setEditTemplate] = useState('CUSTOM');
+  const [editOptions, setEditOptions] = useState([]);
+  const [newQuestionText, setNewQuestionText] = useState('');
+  const [selectedInstrument, setSelectedInstrument] = useState('CESD');
+  const [selectedTemplate, setSelectedTemplate] = useState(DEFAULT_TEMPLATE_BY_INSTRUMENT.CESD);
+  const [newOptions, setNewOptions] = useState(cloneTemplate(DEFAULT_TEMPLATE_BY_INSTRUMENT.CESD));
+  const [loading, setLoading] = useState(true);
+
   // Solo permitir acceso si es la cuenta principal
   if (window.localStorage.getItem('psybioneer-email') !== 'doctor@psybioneer.com') {
     return (
@@ -72,16 +83,6 @@ function QuestionAdminPage({ role, onLogout }) {
       </Shell>
     );
   }
-  const [questions, setQuestions] = useState([]);
-  const [editingId, setEditingId] = useState(null);
-  const [editText, setEditText] = useState('');
-  const [editTemplate, setEditTemplate] = useState('CUSTOM');
-  const [editOptions, setEditOptions] = useState([]);
-  const [newQuestionText, setNewQuestionText] = useState('');
-  const [selectedInstrument, setSelectedInstrument] = useState('CESD');
-  const [selectedTemplate, setSelectedTemplate] = useState(DEFAULT_TEMPLATE_BY_INSTRUMENT.CESD);
-  const [newOptions, setNewOptions] = useState(cloneTemplate(DEFAULT_TEMPLATE_BY_INSTRUMENT.CESD));
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     loadQuestions();

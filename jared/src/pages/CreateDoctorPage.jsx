@@ -5,6 +5,14 @@ import InnerPage from '../components/InnerPage';
 import { userAPI } from '../lib/api';
 
 function CreateDoctorPage({ role, onLogout }) {
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    password: '',
+    confirmPassword: ''
+  });
+  const [loading, setLoading] = useState(false);
+
   // Solo permitir acceso si es la cuenta principal
   if (window.localStorage.getItem('psybioneer-email') !== 'doctor@psybioneer.com') {
     return (
@@ -17,13 +25,6 @@ function CreateDoctorPage({ role, onLogout }) {
       </Shell>
     );
   }
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    password: '',
-    confirmPassword: ''
-  });
-  const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
     setFormData({
