@@ -36,6 +36,90 @@ function HomePage({ role, onLogout }) {
         customClass: { popup: 'faq-modal' }
       });
     };
+
+    const handleShowStats = () => {
+      Swal.fire({
+        title: 'Resultados estadísticos de referencia',
+        html: `
+<div style="text-align:left; max-height:60vh; overflow-y:auto; font-size:1rem; padding-right:8px;">
+<b>Diversos estudios realizados en población mexicana han demostrado que los instrumentos utilizados en este sistema presentan alta confiabilidad, validez y consistencia estadística, lo que respalda su uso en procesos de tamizaje y análisis poblacional.</b><br><br>
+<b>Depresión — CES-D</b><br>
+La escala CES-D ha sido aplicada en una muestra amplia de 57,403 estudiantes mexicanos, reportando una media de 16.2 puntos (DE ≈ 10.4).<br>
+<ul style="margin-top:6px;">
+  <li>Prevalencia de depresión elevada: 14.7%
+    <ul>
+      <li>Mujeres: 17.9%</li>
+      <li>Hombres: 11.1%</li>
+    </ul>
+  </li>
+  <li>Confiabilidad: α = 0.83</li>
+  <li>Varianza explicada: 54.1%</li>
+</ul>
+Aproximadamente 1 de cada 7 personas presenta síntomas depresivos relevantes. Existe una relación directa con el riesgo suicida, lo que convierte a este instrumento en una herramienta clave de detección temprana.<br><br>
+
+<b>Estrés percibido — PSS-14</b><br>
+La escala PSS-14 ha sido validada en población mexicana, incluyendo muestras clínicas como mujeres en etapa puerperal (n ≈ 104), con una media de 22.0 puntos (DE ≈ 8.5).<br>
+<ul style="margin-top:6px;">
+  <li>Confiabilidad: α = 0.72 – 0.83</li>
+  <li>Varianza explicada: hasta 62.2%</li>
+  <li>Estructura: 2 factores (estrés percibido y control)</li>
+  <li>Correlaciones:
+    <ul>
+      <li>Depresión: r ≈ 0.40 – 0.60</li>
+      <li>Ansiedad: r ≈ 0.40 – 0.60</li>
+    </ul>
+  </li>
+</ul>
+El estrés percibido se relaciona de forma moderada con ansiedad y depresión, lo que lo convierte en un indicador útil para evaluar el estado emocional general del paciente.<br><br>
+
+<b>Ansiedad — IDARE</b><br>
+El IDARE permite evaluar dos dimensiones: ansiedad como estado (temporal) y como rasgo (estable).<br>
+<ul style="margin-top:6px;">
+  <li>Media poblacional: 40 – 50 puntos</li>
+  <li>Confiabilidad:
+    <ul>
+      <li>Estado: α = 0.83 – 0.92</li>
+      <li>Rasgo: α = 0.84 – 0.90</li>
+    </ul>
+  </li>
+  <li>Varianza explicada: 50% – 60%</li>
+  <li>Correlación con depresión: r ≈ 0.50</li>
+  <li>Diferencias por sexo: p &lt; 0.05 (mayor en mujeres)</li>
+</ul>
+Permite diferenciar entre ansiedad momentánea y patrones persistentes, siendo útil para seguimiento clínico y análisis longitudinal.<br><br>
+
+<b>Ideación suicida — BSS</b><br>
+La escala BSS evalúa la presencia e intensidad de pensamientos suicidas.<br>
+<ul style="margin-top:6px;">
+  <li>Media (población general): 5 – 10 puntos</li>
+  <li>Media (población de riesgo): &gt; 15 puntos</li>
+  <li>Confiabilidad: α = 0.87 – 0.95</li>
+  <li>Varianza explicada: 60% – 70%</li>
+</ul>
+Es el instrumento más sensible del sistema para la detección de riesgo clínico, permitiendo identificar casos que requieren atención inmediata.<br><br>
+
+<b>Conclusión general</b><br>
+En conjunto, los instrumentos utilizados presentan:<br>
+<ul style="margin-top:6px;">
+  <li>Alta confiabilidad</li>
+  <li>Adecuada validez estructural</li>
+  <li>Relaciones significativas entre variables psicológicas</li>
+</ul>
+<b>Referencias clínicas</b><br>
+<ul style="font-size:0.97em;">
+  <li>González-Forteza, Catalina, et al. (2011). Confiabilidad y validez de la escala de depresión CES-D en un censo de estudiantes de nivel medio superior y superior, en la Ciudad de México. Salud mental, 34(1), 53-59. <a href="http://www.scielo.org.mx/scielo.php?script=sci_arttext&pid=S0185-33252011000100007&lng=es&tlng=es" target="_blank">Enlace</a></li>
+  <li>Torres-Lagunas, M.A., et al. (2015). Validación psicométrica de escalas PSS-14, AFA-R, HDRS, CES-D, EV en puérperas mexicanas con y sin preeclampsia. Enfermería universitaria, 12(3), 122-133. <a href="https://doi.org/10.1016/j.reu.2015.08.001" target="_blank">Enlace</a></li>
+  <li>Reyes Carmona, Carlos, et al. (2017). Ansiedad de los estudiantes de una facultad de medicina mexicana, antes de iniciar el internado. Investigación en educación médica, 6(21), 42-46. <a href="https://doi.org/10.1016/j.riem.2016.05.004" target="_blank">Enlace</a></li>
+</ul>
+</div>
+`,
+        width: 700,
+        confirmButtonText: 'Cerrar',
+        confirmButtonColor: '#2563eb',
+        customClass: { popup: 'faq-modal' },
+        scrollbarPadding: false,
+      });
+    };
   const navigate = useNavigate();
 
   const handleStartEvaluation = async (instrumentCode = 'CESD') => {
@@ -50,8 +134,7 @@ function HomePage({ role, onLogout }) {
   };
 
   const features = [
-    { icon: '📋', label: 'Tests estandarizados' },
-    { icon: '📊', label: 'Estadísticas de investigación' },
+    { icon: '📊', label: 'Estadísticas de investigación', onClick: handleShowStats },
     { icon: '💬', label: 'Preguntas frecuentes', onClick: handleShowFAQ },
   ];
 
