@@ -376,8 +376,8 @@ function PatientsPage({ role, onLogout }) {
                         <input className="input" placeholder="Lugar de nacimiento" value={recordForm.birthplace} onChange={(e) => handleRecordChange('birthplace', e.target.value)} />
                         <input className="input" placeholder="Lugar de residencia (INEGI)" value={recordForm.residence_inegi} onChange={(e) => handleRecordChange('residence_inegi', e.target.value)} />
                         <input className="input" placeholder="Codigo postal" value={recordForm.postal_code} onChange={(e) => handleRecordChange('postal_code', e.target.value)} />
-                        <input className="input" placeholder="Estado" value={recordForm.state} onChange={(e) => handleRecordChange('state', e.target.value)} />
-                        <input className="input" placeholder="Ciudad" value={recordForm.city} onChange={(e) => handleRecordChange('city', e.target.value)} />
+                        <input className="input" placeholder="Municipio de residencia" value={recordForm.state} onChange={(e) => handleRecordChange('state', e.target.value)} />
+                        <input className="input" placeholder="Localidad/barrio de residencia" value={recordForm.city} onChange={(e) => handleRecordChange('city', e.target.value)} />
                       </div>
                       <input className="input" style={{ marginTop: 8 }} placeholder="Domicilio" value={recordForm.address_line} onChange={(e) => handleRecordChange('address_line', e.target.value)} />
                       <textarea className="input" style={{ marginTop: 8, minHeight: 70 }} placeholder="Alergias" value={recordForm.allergies} onChange={(e) => handleRecordChange('allergies', e.target.value)} />
@@ -390,13 +390,8 @@ function PatientsPage({ role, onLogout }) {
                     </div>
 
                     <div style={{ borderTop: '1px solid #e2e8f0', marginTop: 6, paddingTop: 10 }}>
-                      <h4 style={{ margin: '0 0 8px 0', color: '#0f172a' }}>Administracion del paciente</h4>
+                      <h4 style={{ margin: '0 0 8px 0', color: '#0f172a' }}>Administración del paciente</h4>
                       <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                        <button className="btn-ghost" onClick={() => updateStatus('active')}>Activar</button>
-                        <button className="btn-ghost" onClick={() => updateStatus('inactive')}>Inhabilitar</button>
-                        <button className="btn-ghost" onClick={() => updateStatus('discharged')} style={{ borderColor: '#fecaca', color: '#b91c1c' }}>
-                          Dar de baja
-                        </button>
                         <button className="btn-ghost" onClick={() => handleDeletePatient(selectedPatient, selectedProfile?.name)} style={{ borderColor: '#ef4444', color: '#b91c1c' }}>
                           Eliminar paciente
                         </button>
