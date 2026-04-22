@@ -126,11 +126,11 @@ En conjunto, los instrumentos utilizados presentan:<br>
     await Swal.fire({
       icon: 'info',
       title: 'Comenzando evaluación',
-      text: 'Serás redirigido al test seleccionado.',
+      text: 'Serás redirigido para seleccionar el test que deseas realizar.',
       confirmButtonText: 'Continuar',
       confirmButtonColor: '#2563eb',
     });
-    navigate(`/test?instrument=${instrumentCode}`);
+    navigate('/test');
   };
 
   const features = [
