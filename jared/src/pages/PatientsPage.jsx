@@ -9,7 +9,21 @@ import Shell from '../components/Shell';
 import InnerPage from '../components/InnerPage';
 import { userAPI, testAPI } from '../lib/api';
 
-// ...existing code...
+
+function PatientsPage({ role, onLogout }) {
+  const getPsychologistLetter = () => {
+    const email = localStorage.getItem('psybioneer-email') || '';
+    const code = email ? email.charCodeAt(0) - 97 : 0;
+    const letter = String.fromCharCode(65 + ((code >= 0 && code < 26) ? code : 0));
+    return letter;
+  };
+  const psychologistLetter = getPsychologistLetter();
+  const [isMobile, setIsMobile] = useState(() => window.innerWidth <= 920);
+  const [patients, setPatients] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedPatient, setSelectedPatient] = useState(null);
+  const [patientTests, setPatientTests] = useState([]);
+  const [selectedProfile, setSelectedProfile] = useState(null);
   const [savingRecord, setSavingRecord] = useState(false);
   const [recordForm, setRecordForm] = useState({
     gender: '',
@@ -60,6 +74,11 @@ import { userAPI, testAPI } from '../lib/api';
       record: recordForm
     };
   };
+
+
+}
+
+export default PatientsPage;
 
 function PatientsPage({ role, onLogout }) {
   // Simulación: obtener letra del psicólogo por su email (en real, sería por id)
