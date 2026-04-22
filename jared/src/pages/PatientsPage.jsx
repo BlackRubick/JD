@@ -1,3 +1,12 @@
+
+import { useState, useEffect } from 'react';
+import { exportPatientPDF } from '../utils/exportPatientPDF';
+import { getAppointmentRequests, updateAppointmentRequest, addAppointmentRequest } from '../lib/appointments';
+import { Link } from 'react-router-dom';
+import Swal from 'sweetalert2';
+import Shell from '../components/Shell';
+import InnerPage from '../components/InnerPage';
+import { userAPI, testAPI } from '../lib/api';
   // --- Folio para paciente seleccionado (igual que en la lista) ---
   const getSelectedPatientFolio = () => {
     if (!selectedProfile) return '';
@@ -27,14 +36,6 @@
       record: recordForm
     };
   };
-import { useState, useEffect } from 'react';
-import { exportPatientPDF } from '../utils/exportPatientPDF';
-import { getAppointmentRequests, updateAppointmentRequest, addAppointmentRequest } from '../lib/appointments';
-import { Link } from 'react-router-dom';
-import Swal from 'sweetalert2';
-import Shell from '../components/Shell';
-import InnerPage from '../components/InnerPage';
-import { userAPI, testAPI } from '../lib/api';
 
 function PatientsPage({ role, onLogout }) {
   // Simulación: obtener letra del psicólogo por su email (en real, sería por id)
