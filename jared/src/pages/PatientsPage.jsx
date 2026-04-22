@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { getAppointmentRequests, updateAppointmentRequest } from '../lib/appointments';
 import { Link } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import Shell from '../components/Shell';
@@ -218,8 +219,98 @@ function PatientsPage({ role, onLogout }) {
     }
   };
 
+  // --- Citas solicitadas (solo para psicólogo) ---
+  const [appointments, setAppointments] = useState([]);
+  useEffect(() => {
+    if (role === 'therapist' || role === 'doctor') {
+      setAppointments(getAppointmentRequests());
+    }
+  }, [role]);
+
+  const handleAcceptAppointment = (idx, keepDate) => {
+    let newDate = '';
+    let newTime = '';
+    if (!keepDate) {
+      Swal.fire({
+        title: 'Reagendar cita',
+        html:
+          `<input id="swal-date" type="date" class="swal2-input" placeholder="Fecha" style="margin-bottom:8px;" />` +
+          `<input id="swal-time" type="time" class="swal2-input" placeholder="Hora" />`,
+        focusConfirm: false,
+        showCancelButton: true,
+        confirmButtonText: 'Agendar',
+        preConfirm: () => {
+          const date = document.getElementById('swal-date').value;
+          const time = document.getElementById('swal-time').value;
+          if (!date || !time) {
+            Swal.showValidationMessage('Debes ingresar fecha y hora');
+            return false;
+          }
+          return { date, time };
+        }
+      }).then(({ value }) => {
+        if (value) {
+          updateAppointmentRequest(idx, { status: 'agendada', date: value.date, time: value.time });
+          setAppointments(getAppointmentRequests());
+          Swal.fire({ icon: 'success', title: 'Cita agendada', timer: 1200, showConfirmButton: false });
+        }
+      });
+      return;
+    }
+    updateAppointmentRequest(idx, { status: 'agendada' });
+    setAppointments(getAppointmentRequests());
+    Swal.fire({ icon: 'success', title: 'Cita agendada', timer: 1200, showConfirmButton: false });
+  };
+
   return (
     <Shell role={role} onLogout={onLogout}>
+      {(role === 'therapist' || role === 'doctor') && appointments.length > 0 && (
+        <>
+          {/* Solicitudes pendientes */}
+          <div className="card" style={{ margin: '1rem 0', padding: '1.5rem', background: '#f8fafc' }}>
+            <h3 style={{ margin: 0, color: '#0f172a', fontSize: '1.1rem' }}>Solicitudes de cita</h3>
+            <div style={{ marginTop: 12, display: 'grid', gap: 12 }}>
+              {appointments.filter(a => a.status !== 'agendada').length === 0 ? (
+                <div style={{ color: '#64748b', fontSize: '0.97rem' }}>No hay solicitudes pendientes.</div>
+              ) : appointments.map((a, idx) => a.status !== 'agendada' && (
+                <div key={idx} style={{ border: '1px solid #e2e8f0', borderRadius: 8, padding: 12, background: '#fff' }}>
+                  <div style={{ fontSize: '0.97rem', color: '#334155' }}>
+                    <b>Paciente:</b> {a.patientName || 'Paciente'}<br/>
+                    <b>Fecha propuesta:</b> {a.date} <b>Hora:</b> {a.time}<br/>
+                    <b>Estatus:</b> Pendiente
+                  </div>
+                  <div style={{ marginTop: 8, display: 'flex', gap: 8 }}>
+                    <button className="btn-primary" style={{ fontSize: '0.9rem' }} onClick={() => handleAcceptAppointment(idx, true)}>
+                      Aceptar fecha propuesta
+                    </button>
+                    <button className="btn-ghost" style={{ fontSize: '0.9rem' }} onClick={() => handleAcceptAppointment(idx, false)}>
+                      Reagendar
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Citas agendadas */}
+          <div className="card" style={{ margin: '1rem 0', padding: '1.5rem', background: '#f0fdf4' }}>
+            <h3 style={{ margin: 0, color: '#166534', fontSize: '1.1rem' }}>Citas agendadas</h3>
+            <div style={{ marginTop: 12, display: 'grid', gap: 12 }}>
+              {appointments.filter(a => a.status === 'agendada').length === 0 ? (
+                <div style={{ color: '#64748b', fontSize: '0.97rem' }}>No hay citas agendadas.</div>
+              ) : appointments.map((a, idx) => a.status === 'agendada' && (
+                <div key={idx} style={{ border: '1px solid #bbf7d0', borderRadius: 8, padding: 12, background: '#fff' }}>
+                  <div style={{ fontSize: '0.97rem', color: '#166534' }}>
+                    <b>Paciente:</b> {a.patientName || 'Paciente'}<br/>
+                    <b>Fecha:</b> {a.date} <b>Hora:</b> {a.time}<br/>
+                    <b>Estatus:</b> Agendada
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </>
+      )}
       <InnerPage 
         title="Gestión de Pacientes" 
         subtitle="Lista de todos los pacientes registrados"
@@ -288,13 +379,18 @@ function PatientsPage({ role, onLogout }) {
                         </Link>
                         <button
                           className="btn-ghost"
-                          style={{ marginTop: 8, borderColor: '#ef4444', color: '#b91c1c', width: '100%' }}
+                          style={{ marginTop: 8, borderColor: '#2563eb', color: '#2563eb', width: '100%' }}
                           onClick={(e) => {
                             e.stopPropagation();
-                            handleDeletePatient(patient.id, patient.name);
+                            Swal.fire({
+                              icon: 'info',
+                              title: 'Agendar cita',
+                              text: 'Funcionalidad de agendar cita próximamente.',
+                              confirmButtonColor: '#2563eb'
+                            });
                           }}
                         >
-                          Eliminar
+                          Agendar cita
                         </button>
                       </div>
                     </div>

@@ -1,10 +1,41 @@
 import Shell from '../components/Shell';
 import InnerPage from '../components/InnerPage';
+import Swal from 'sweetalert2';
 
 function ResourcesPage({ role, onLogout }) {
   const resources = [
     { title: 'Líneas de apoyo', desc: 'Línea de la Vida 800 911 2000', icon: '📞', tag: 'Urgencias' },
   ];
+
+  const handleRequestAppointment = async () => {
+    const { value: formValues } = await Swal.fire({
+      title: 'Solicitar cita',
+      html:
+        `<input id="swal-date" type="date" class="swal2-input" placeholder="Fecha" style="margin-bottom:8px;" />` +
+        `<input id="swal-time" type="time" class="swal2-input" placeholder="Hora" />`,
+      focusConfirm: false,
+      showCancelButton: true,
+      confirmButtonText: 'Solicitar',
+      preConfirm: () => {
+        const date = document.getElementById('swal-date').value;
+        const time = document.getElementById('swal-time').value;
+        if (!date || !time) {
+          Swal.showValidationMessage('Debes ingresar fecha y hora');
+          return false;
+        }
+        return { date, time };
+      }
+    });
+    if (formValues) {
+      await Swal.fire({
+        icon: 'success',
+        title: 'Solicitud enviada',
+        text: `Tu solicitud de cita para el día ${formValues.date} a las ${formValues.time} ha sido enviada.`,
+        confirmButtonColor: '#2563eb'
+      });
+      // Aquí podrías enviar la solicitud al backend si lo deseas
+    }
+  };
 
   return (
     <Shell role={role} onLogout={onLogout}>
@@ -17,6 +48,11 @@ function ResourcesPage({ role, onLogout }) {
             <li><b>IDARE</b> (Ansiedad Estado-Rasgo)</li>
             <li><b>BSS</b> (Ideación Suicida)</li>
           </ul>
+        </div>
+        <div style={{ marginBottom: 24 }}>
+          <button className="btn-primary" style={{ padding: '12px 28px', fontSize: '1rem' }} onClick={handleRequestAppointment}>
+            Solicitar cita
+          </button>
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 20 }}>
           {resources.map((r) => (
