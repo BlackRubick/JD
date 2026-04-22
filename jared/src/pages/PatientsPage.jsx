@@ -9,25 +9,7 @@ import Shell from '../components/Shell';
 import InnerPage from '../components/InnerPage';
 import { userAPI, testAPI } from '../lib/api';
 
-function PatientsPage({ role, onLogout }) {
-  // Simulación: obtener letra del psicólogo por su email (en real, sería por id)
-  // Ejemplo: primer psicólogo 'A', segundo 'B', etc.
-  // Aquí usamos el primer caracter del correo si existe, si no, 'A'
-  const getPsychologistLetter = () => {
-    // En real, obtén el índice del psicólogo en la lista de doctores
-    const email = localStorage.getItem('psybioneer-email') || '';
-    // Simulación: hash simple
-    const code = email ? email.charCodeAt(0) - 97 : 0;
-    const letter = String.fromCharCode(65 + ((code >= 0 && code < 26) ? code : 0));
-    return letter;
-  };
-  const psychologistLetter = getPsychologistLetter();
-  const [isMobile, setIsMobile] = useState(() => window.innerWidth <= 920);
-  const [patients, setPatients] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [selectedPatient, setSelectedPatient] = useState(null);
-  const [patientTests, setPatientTests] = useState([]);
-  const [selectedProfile, setSelectedProfile] = useState(null);
+// ...existing code...
   const [savingRecord, setSavingRecord] = useState(false);
   const [recordForm, setRecordForm] = useState({
     gender: '',
@@ -636,5 +618,5 @@ function PatientsPage({ role, onLogout }) {
     </Shell>
   );
 }
-}
+
 export default PatientsPage;
