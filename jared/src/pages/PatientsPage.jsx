@@ -1,4 +1,34 @@
+  // --- Folio para paciente seleccionado (igual que en la lista) ---
+  const getSelectedPatientFolio = () => {
+    if (!selectedProfile) return '';
+    const idx = patients.findIndex(p => p.id === selectedProfile.id);
+    if (idx === -1) return '';
+    return `${psychologistLetter}${String(idx + 1).padStart(4, '0')}`;
+  };
+
+  // --- Datos para exportar a PDF ---
+  const getPatientExportData = () => {
+    if (!selectedProfile) return null;
+    const folio = getSelectedPatientFolio();
+    const age = selectedProfile.date_of_birth ? Math.floor((new Date() - new Date(selectedProfile.date_of_birth)) / (365.25 * 24 * 60 * 60 * 1000)) : '';
+    const sex = selectedProfile.sex || '';
+    const tests = patientTests.map(t => ({
+      name: t.test_name || t.name,
+      date: t.created_at,
+      score: t.total_score,
+      interpretation: t.interpretation || ''
+    }));
+    return {
+      folio,
+      age,
+      sex,
+      tests,
+      profile: selectedProfile,
+      record: recordForm
+    };
+  };
 import { useState, useEffect } from 'react';
+import { exportPatientPDF } from '../utils/exportPatientPDF';
 import { getAppointmentRequests, updateAppointmentRequest, addAppointmentRequest } from '../lib/appointments';
 import { Link } from 'react-router-dom';
 import Swal from 'sweetalert2';
@@ -7,6 +37,18 @@ import InnerPage from '../components/InnerPage';
 import { userAPI, testAPI } from '../lib/api';
 
 function PatientsPage({ role, onLogout }) {
+  // Simulación: obtener letra del psicólogo por su email (en real, sería por id)
+  // Ejemplo: primer psicólogo 'A', segundo 'B', etc.
+  // Aquí usamos el primer caracter del correo si existe, si no, 'A'
+  const getPsychologistLetter = () => {
+    // En real, obtén el índice del psicólogo en la lista de doctores
+    const email = localStorage.getItem('psybioneer-email') || '';
+    // Simulación: hash simple
+    const code = email ? email.charCodeAt(0) - 97 : 0;
+    const letter = String.fromCharCode(65 + ((code >= 0 && code < 26) ? code : 0));
+    return letter;
+  };
+  const psychologistLetter = getPsychologistLetter();
   const [isMobile, setIsMobile] = useState(() => window.innerWidth <= 920);
   const [patients, setPatients] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -329,22 +371,25 @@ function PatientsPage({ role, onLogout }) {
                   <p style={{ color: '#666' }}>No hay pacientes registrados</p>
                 </div>
               ) : (
-                patients.map((patient) => (
-                  <div
-                    key={patient.id}
-                    className="card"
-                    style={{ 
-                      padding: '1.5rem',
-                      cursor: 'pointer',
-                      border: selectedPatient === patient.id ? '2px solid #0066cc' : '2px solid transparent'
-                    }}
-                    onClick={() => loadPatientTests(patient.id)}
-                  >
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <div>
-                        <h3 style={{ margin: '0 0 0.5rem 0', color: '#001f3f' }}>
-                          {patient.name}
-                        </h3>
+                patients.map((patient, idx) => {
+                  // Folio: Letra del psicólogo + número incremental (relleno 4 dígitos)
+                  const folio = `${psychologistLetter}${String(idx + 1).padStart(4, '0')}`;
+                  return (
+                    <div
+                      key={patient.id}
+                      className="card"
+                      style={{ 
+                        padding: '1.5rem',
+                        cursor: 'pointer',
+                        border: selectedPatient === patient.id ? '2px solid #0066cc' : '2px solid transparent'
+                      }}
+                      onClick={() => loadPatientTests(patient.id)}
+                    >
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <div>
+                          <h3 style={{ margin: '0 0 0.5rem 0', color: '#001f3f', letterSpacing: '0.04em' }}>
+                            Folio: {folio}
+                          </h3>
                         <p style={{ margin: '0.25rem 0', fontSize: '0.9rem', color: '#666' }}>
                           📧 {patient.email}
                         </p>
@@ -458,7 +503,8 @@ function PatientsPage({ role, onLogout }) {
                       </div>
                     )}
                   </div>
-                ))
+                    );
+                })
               )}
             </div>
 
@@ -469,6 +515,18 @@ function PatientsPage({ role, onLogout }) {
                   </p>
                 ) : (
                   <div style={{ display: 'grid', gap: '0.9rem' }}>
+                    {/* Botón para exportar PDF (solo preparación, sin lógica aún) */}
+                    <button
+                      className="btn-primary"
+                      style={{ marginBottom: 10, maxWidth: 220 }}
+                      onClick={() => {
+                        const data = getPatientExportData();
+                        if (!data) return;
+                        exportPatientPDF(data);
+                      }}
+                    >
+                      Exportar PDF
+                    </button>
                     <h3 style={{ color: '#001f3f', margin: 0 }}>Perfil detallado del paciente</h3>
                     <div style={{ fontSize: '0.85rem', color: '#334155' }}>
                       <strong>Nombre:</strong> {selectedProfile.name}
