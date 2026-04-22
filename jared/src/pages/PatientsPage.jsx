@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { getAppointmentRequests, updateAppointmentRequest } from '../lib/appointments';
+import { getAppointmentRequests, updateAppointmentRequest, addAppointmentRequest } from '../lib/appointments';
 import { Link } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import Shell from '../components/Shell';
@@ -380,14 +380,41 @@ function PatientsPage({ role, onLogout }) {
                         <button
                           className="btn-ghost"
                           style={{ marginTop: 8, borderColor: '#2563eb', color: '#2563eb', width: '100%' }}
-                          onClick={(e) => {
+                          onClick={async (e) => {
                             e.stopPropagation();
-                            Swal.fire({
-                              icon: 'info',
+                            const { value: formValues } = await Swal.fire({
                               title: 'Agendar cita',
-                              text: 'Funcionalidad de agendar cita próximamente.',
-                              confirmButtonColor: '#2563eb'
+                              html:
+                                `<input id="swal-date" type="date" class="swal2-input" placeholder="Fecha" style="margin-bottom:8px;" />` +
+                                `<input id="swal-time" type="time" class="swal2-input" placeholder="Hora" />`,
+                              focusConfirm: false,
+                              showCancelButton: true,
+                              confirmButtonText: 'Solicitar',
+                              preConfirm: () => {
+                                const date = document.getElementById('swal-date').value;
+                                const time = document.getElementById('swal-time').value;
+                                if (!date || !time) {
+                                  Swal.showValidationMessage('Debes ingresar fecha y hora');
+                                  return false;
+                                }
+                                return { date, time };
+                              }
                             });
+                            if (formValues) {
+                              addAppointmentRequest({
+                                patientName: patient.name,
+                                patientId: patient.id,
+                                date: formValues.date,
+                                time: formValues.time,
+                                status: 'pendiente'
+                              });
+                              Swal.fire({
+                                icon: 'success',
+                                title: 'Solicitud enviada',
+                                text: `Tu solicitud de cita para el día ${formValues.date} a las ${formValues.time} ha sido enviada.`,
+                                confirmButtonColor: '#2563eb'
+                              });
+                            }
                           }}
                         >
                           Agendar cita
