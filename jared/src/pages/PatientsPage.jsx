@@ -1,5 +1,3 @@
-
-
 import { useState, useEffect } from 'react';
 import { exportPatientPDF } from '../utils/exportPatientPDF';
 import { getAppointmentRequests, updateAppointmentRequest, addAppointmentRequest } from '../lib/appointments';
@@ -10,17 +8,13 @@ import InnerPage from '../components/InnerPage';
 import { userAPI, testAPI } from '../lib/api';
 
 function PatientsPage({ role, onLogout }) {
-  // Simulación: obtener letra del psicólogo por su email (en real, sería por id)
-  // Ejemplo: primer psicólogo 'A', segundo 'B', etc.
-  // Aquí usamos el primer caracter del correo si existe, si no, 'A'
   const getPsychologistLetter = () => {
-    // En real, obtén el índice del psicólogo en la lista de doctores
     const email = localStorage.getItem('psybioneer-email') || '';
-    // Simulación: hash simple
     const code = email ? email.charCodeAt(0) - 97 : 0;
     const letter = String.fromCharCode(65 + ((code >= 0 && code < 26) ? code : 0));
     return letter;
   };
+
   const psychologistLetter = getPsychologistLetter();
   const [isMobile, setIsMobile] = useState(() => window.innerWidth <= 920);
   const [patients, setPatients] = useState([]);
@@ -48,8 +42,9 @@ function PatientsPage({ role, onLogout }) {
     current_medications: '',
     notes: '',
   });
+  const [appointments, setAppointments] = useState([]);
 
-  // --- Folio para paciente seleccionado (igual que en la lista) ---
+  // --- Folio para paciente seleccionado ---
   const getSelectedPatientFolio = () => {
     if (!selectedProfile) return '';
     const idx = patients.findIndex(p => p.id === selectedProfile.id);
@@ -61,7 +56,9 @@ function PatientsPage({ role, onLogout }) {
   const getPatientExportData = () => {
     if (!selectedProfile) return null;
     const folio = getSelectedPatientFolio();
-    const age = selectedProfile.date_of_birth ? Math.floor((new Date() - new Date(selectedProfile.date_of_birth)) / (365.25 * 24 * 60 * 60 * 1000)) : '';
+    const age = selectedProfile.date_of_birth
+      ? Math.floor((new Date() - new Date(selectedProfile.date_of_birth)) / (365.25 * 24 * 60 * 60 * 1000))
+      : '';
     const sex = selectedProfile.sex || '';
     const tests = patientTests.map(t => ({
       name: t.test_name || t.name,
@@ -79,46 +76,6 @@ function PatientsPage({ role, onLogout }) {
     };
   };
 
-function PatientsPage({ role, onLogout }) {
-  // Simulación: obtener letra del psicólogo por su email (en real, sería por id)
-  // Ejemplo: primer psicólogo 'A', segundo 'B', etc.
-  // Aquí usamos el primer caracter del correo si existe, si no, 'A'
-  const getPsychologistLetter = () => {
-    // En real, obtén el índice del psicólogo en la lista de doctores
-    const email = localStorage.getItem('psybioneer-email') || '';
-    // Simulación: hash simple
-    const code = email ? email.charCodeAt(0) - 97 : 0;
-    const letter = String.fromCharCode(65 + ((code >= 0 && code < 26) ? code : 0));
-    return letter;
-  };
-  const psychologistLetter = getPsychologistLetter();
-  const [isMobile, setIsMobile] = useState(() => window.innerWidth <= 920);
-  const [patients, setPatients] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [selectedPatient, setSelectedPatient] = useState(null);
-  const [patientTests, setPatientTests] = useState([]);
-  const [selectedProfile, setSelectedProfile] = useState(null);
-  const [savingRecord, setSavingRecord] = useState(false);
-  const [recordForm, setRecordForm] = useState({
-    gender: '',
-    curp: '',
-    phone: '',
-    birthplace: '',
-    nationality: '',
-    residence_inegi: '',
-    first_name: '',
-    last_name: '',
-    second_last_name: '',
-    address_line: '',
-    city: '',
-    state: '',
-    postal_code: '',
-    allergies: '',
-    chronic_conditions: '',
-    current_medications: '',
-    notes: '',
-  });
-
   useEffect(() => {
     console.log('[PatientsPage] Montando componente...');
     loadPatients();
@@ -129,6 +86,12 @@ function PatientsPage({ role, onLogout }) {
     window.addEventListener('resize', onResize);
     return () => window.removeEventListener('resize', onResize);
   }, []);
+
+  useEffect(() => {
+    if (role === 'therapist' || role === 'doctor') {
+      setAppointments(getAppointmentRequests());
+    }
+  }, [role]);
 
   const loadPatients = async () => {
     try {
@@ -195,7 +158,6 @@ function PatientsPage({ role, onLogout }) {
 
   const saveClinicalRecord = async () => {
     if (!selectedPatient) return;
-
     try {
       setSavingRecord(true);
       const data = await userAPI.updatePatientClinicalRecord(selectedPatient, recordForm);
@@ -222,7 +184,11 @@ function PatientsPage({ role, onLogout }) {
     if (!selectedPatient) return;
 
     const { value: reason } = await Swal.fire({
-      title: status === 'inactive' ? 'Inhabilitar paciente' : (status === 'discharged' ? 'Dar de baja paciente' : 'Reactivar paciente'),
+      title: status === 'inactive'
+        ? 'Inhabilitar paciente'
+        : status === 'discharged'
+          ? 'Dar de baja paciente'
+          : 'Reactivar paciente',
       input: 'text',
       inputLabel: 'Motivo administrativo',
       inputPlaceholder: 'Ej. tratamiento concluido',
@@ -308,17 +274,7 @@ function PatientsPage({ role, onLogout }) {
     }
   };
 
-  // --- Citas solicitadas (solo para psicólogo) ---
-  const [appointments, setAppointments] = useState([]);
-  useEffect(() => {
-    if (role === 'therapist' || role === 'doctor') {
-      setAppointments(getAppointmentRequests());
-    }
-  }, [role]);
-
   const handleAcceptAppointment = (idx, keepDate) => {
-    let newDate = '';
-    let newTime = '';
     if (!keepDate) {
       Swal.fire({
         title: 'Reagendar cita',
@@ -364,8 +320,8 @@ function PatientsPage({ role, onLogout }) {
               ) : appointments.map((a, idx) => a.status !== 'agendada' && (
                 <div key={idx} style={{ border: '1px solid #e2e8f0', borderRadius: 8, padding: 12, background: '#fff' }}>
                   <div style={{ fontSize: '0.97rem', color: '#334155' }}>
-                    <b>Paciente:</b> {a.patientName || 'Paciente'}<br/>
-                    <b>Fecha propuesta:</b> {a.date} <b>Hora:</b> {a.time}<br/>
+                    <b>Paciente:</b> {a.patientName || 'Paciente'}<br />
+                    <b>Fecha propuesta:</b> {a.date} <b>Hora:</b> {a.time}<br />
                     <b>Estatus:</b> Pendiente
                   </div>
                   <div style={{ marginTop: 8, display: 'flex', gap: 8 }}>
@@ -390,8 +346,8 @@ function PatientsPage({ role, onLogout }) {
               ) : appointments.map((a, idx) => a.status === 'agendada' && (
                 <div key={idx} style={{ border: '1px solid #bbf7d0', borderRadius: 8, padding: 12, background: '#fff' }}>
                   <div style={{ fontSize: '0.97rem', color: '#166534' }}>
-                    <b>Paciente:</b> {a.patientName || 'Paciente'}<br/>
-                    <b>Fecha:</b> {a.date} <b>Hora:</b> {a.time}<br/>
+                    <b>Paciente:</b> {a.patientName || 'Paciente'}<br />
+                    <b>Fecha:</b> {a.date} <b>Hora:</b> {a.time}<br />
                     <b>Estatus:</b> Agendada
                   </div>
                 </div>
@@ -400,8 +356,9 @@ function PatientsPage({ role, onLogout }) {
           </div>
         </>
       )}
-      <InnerPage 
-        title="Gestión de Pacientes" 
+
+      <InnerPage
+        title="Gestión de Pacientes"
         subtitle="Lista de todos los pacientes registrados"
         icon="👥"
       >
@@ -413,149 +370,150 @@ function PatientsPage({ role, onLogout }) {
             </div>
           ) : (
             <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1.15fr 1fr', gap: '1rem' }}>
-              <div style={{ display: 'grid', gap: '1rem' }}>
-              {patients.length === 0 ? (
-                <div className="card" style={{ padding: '3rem', textAlign: 'center' }}>
-                  <p style={{ color: '#666' }}>No hay pacientes registrados</p>
-                </div>
-              ) : (
-                patients.map((patient, idx) => {
-                  // Folio: Letra del psicólogo + número incremental (relleno 4 dígitos)
-                  const folio = `${psychologistLetter}${String(idx + 1).padStart(4, '0')}`;
-                  return (
-                    <div
-                      key={patient.id}
-                      className="card"
-                      style={{ 
-                        padding: '1.5rem',
-                        cursor: 'pointer',
-                        border: selectedPatient === patient.id ? '2px solid #0066cc' : '2px solid transparent'
-                      }}
-                      onClick={() => loadPatientTests(patient.id)}
-                    >
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <div>
-                          <h3 style={{ margin: '0 0 0.5rem 0', color: '#001f3f', letterSpacing: '0.04em' }}>
-                            Folio: {folio}
-                          </h3>
-                        <p style={{ margin: '0.25rem 0', fontSize: '0.9rem', color: '#666' }}>
-                          📧 {patient.email}
-                        </p>
-                        <p style={{ margin: '0.25rem 0', fontSize: '0.82rem', color: '#475569' }}>
-                          Estatus: {patient.patient_status === 'inactive' ? 'Inhabilitado' : (patient.patient_status === 'discharged' ? 'De baja' : 'Activo')}
-                        </p>
-                        {patient.date_of_birth && (
-                          <p style={{ margin: '0.25rem 0', fontSize: '0.9rem', color: '#666' }}>
-                            📅 {new Date(patient.date_of_birth).toLocaleDateString()}
-                          </p>
-                        )}
-                        {patient.sex && (
-                          <p style={{ margin: '0.25rem 0', fontSize: '0.9rem', color: '#666' }}>
-                            👤 {patient.sex}
-                          </p>
-                        )}
-                      </div>
-                      <div style={{ textAlign: 'right' }}>
-                        <Link
-                          to={`/patient/${patient.id}/tests`}
-                          style={{
-                            padding: '0.5rem 1rem',
-                            background: '#0066cc',
-                            color: 'white',
-                            textDecoration: 'none',
-                            borderRadius: '6px',
-                            fontSize: '0.9rem'
-                          }}
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          Ver tests →
-                        </Link>
-                        <button
-                          className="btn-ghost"
-                          style={{ marginTop: 8, borderColor: '#2563eb', color: '#2563eb', width: '100%' }}
-                          onClick={async (e) => {
-                            e.stopPropagation();
-                            const { value: formValues } = await Swal.fire({
-                              title: 'Agendar cita',
-                              html:
-                                `<input id="swal-date" type="date" class="swal2-input" placeholder="Fecha" style="margin-bottom:8px;" />` +
-                                `<input id="swal-time" type="time" class="swal2-input" placeholder="Hora" />`,
-                              focusConfirm: false,
-                              showCancelButton: true,
-                              confirmButtonText: 'Solicitar',
-                              preConfirm: () => {
-                                const date = document.getElementById('swal-date').value;
-                                const time = document.getElementById('swal-time').value;
-                                if (!date || !time) {
-                                  Swal.showValidationMessage('Debes ingresar fecha y hora');
-                                  return false;
-                                }
-                                return { date, time };
-                              }
-                            });
-                            if (formValues) {
-                              addAppointmentRequest({
-                                patientName: patient.name,
-                                patientId: patient.id,
-                                date: formValues.date,
-                                time: formValues.time,
-                                status: 'pendiente'
-                              });
-                              Swal.fire({
-                                icon: 'success',
-                                title: 'Solicitud enviada',
-                                text: `Tu solicitud de cita para el día ${formValues.date} a las ${formValues.time} ha sido enviada.`,
-                                confirmButtonColor: '#2563eb'
-                              });
-                            }
-                          }}
-                        >
-                          Agendar cita
-                        </button>
-                      </div>
-                    </div>
 
-                    {selectedPatient === patient.id && patientTests.length > 0 && (
-                      <div style={{ marginTop: '1.5rem', paddingTop: '1.5rem', borderTop: '1px solid #dee2e6' }}>
-                        <h4 style={{ marginBottom: '1rem', fontSize: '1rem' }}>
-                          Tests completados: {patientTests.filter(t => t.status === 'completed').length}
-                        </h4>
-                        <div style={{ display: 'grid', gap: '0.5rem' }}>
-                          {patientTests.slice(0, 3).map((test) => (
-                            <div
-                              key={test.id}
-                              style={{
-                                padding: '0.75rem',
-                                background: '#f8f9fa',
-                                borderRadius: '6px',
-                                fontSize: '0.85rem'
-                              }}
-                            >
-                              <span style={{ fontWeight: 600 }}>
-                                {new Date(test.created_at).toLocaleDateString()}
-                              </span>
-                              {' - '}
-                              <span style={{ 
-                                color: test.status === 'completed' ? '#28a745' : '#ffc107'
-                              }}>
-                                {test.status === 'completed' ? 'Completado' : 'En progreso'}
-                              </span>
-                              {test.total_score !== null && (
-                                <span style={{ marginLeft: '1rem', fontWeight: 600 }}>
-                                  Puntaje: {test.total_score}
-                                </span>
+              {/* Lista de pacientes */}
+              <div style={{ display: 'grid', gap: '1rem' }}>
+                {patients.length === 0 ? (
+                  <div className="card" style={{ padding: '3rem', textAlign: 'center' }}>
+                    <p style={{ color: '#666' }}>No hay pacientes registrados</p>
+                  </div>
+                ) : (
+                  patients.map((patient, idx) => {
+                    const folio = `${psychologistLetter}${String(idx + 1).padStart(4, '0')}`;
+                    return (
+                      <div key={patient.id}>
+                        <div
+                          className="card"
+                          style={{
+                            padding: '1.5rem',
+                            cursor: 'pointer',
+                            border: selectedPatient === patient.id ? '2px solid #0066cc' : '2px solid transparent'
+                          }}
+                          onClick={() => loadPatientTests(patient.id)}
+                        >
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <div>
+                              <h3 style={{ margin: '0 0 0.5rem 0', color: '#001f3f', letterSpacing: '0.04em' }}>
+                                Folio: {folio}
+                              </h3>
+                              <p style={{ margin: '0.25rem 0', fontSize: '0.9rem', color: '#666' }}>
+                                📧 {patient.email}
+                              </p>
+                              <p style={{ margin: '0.25rem 0', fontSize: '0.82rem', color: '#475569' }}>
+                                Estatus: {patient.patient_status === 'inactive' ? 'Inhabilitado' : (patient.patient_status === 'discharged' ? 'De baja' : 'Activo')}
+                              </p>
+                              {patient.date_of_birth && (
+                                <p style={{ margin: '0.25rem 0', fontSize: '0.9rem', color: '#666' }}>
+                                  📅 {new Date(patient.date_of_birth).toLocaleDateString()}
+                                </p>
+                              )}
+                              {patient.sex && (
+                                <p style={{ margin: '0.25rem 0', fontSize: '0.9rem', color: '#666' }}>
+                                  👤 {patient.sex}
+                                </p>
                               )}
                             </div>
-                          ))}
+                            <div style={{ textAlign: 'right' }}>
+                              <Link
+                                to={`/patient/${patient.id}/tests`}
+                                style={{
+                                  padding: '0.5rem 1rem',
+                                  background: '#0066cc',
+                                  color: 'white',
+                                  textDecoration: 'none',
+                                  borderRadius: '6px',
+                                  fontSize: '0.9rem'
+                                }}
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                Ver tests →
+                              </Link>
+                              <button
+                                className="btn-ghost"
+                                style={{ marginTop: 8, borderColor: '#2563eb', color: '#2563eb', width: '100%' }}
+                                onClick={async (e) => {
+                                  e.stopPropagation();
+                                  const { value: formValues } = await Swal.fire({
+                                    title: 'Agendar cita',
+                                    html:
+                                      `<input id="swal-date" type="date" class="swal2-input" placeholder="Fecha" style="margin-bottom:8px;" />` +
+                                      `<input id="swal-time" type="time" class="swal2-input" placeholder="Hora" />`,
+                                    focusConfirm: false,
+                                    showCancelButton: true,
+                                    confirmButtonText: 'Solicitar',
+                                    preConfirm: () => {
+                                      const date = document.getElementById('swal-date').value;
+                                      const time = document.getElementById('swal-time').value;
+                                      if (!date || !time) {
+                                        Swal.showValidationMessage('Debes ingresar fecha y hora');
+                                        return false;
+                                      }
+                                      return { date, time };
+                                    }
+                                  });
+                                  if (formValues) {
+                                    addAppointmentRequest({
+                                      patientName: patient.name,
+                                      patientId: patient.id,
+                                      date: formValues.date,
+                                      time: formValues.time,
+                                      status: 'pendiente'
+                                    });
+                                    Swal.fire({
+                                      icon: 'success',
+                                      title: 'Solicitud enviada',
+                                      text: `Tu solicitud de cita para el día ${formValues.date} a las ${formValues.time} ha sido enviada.`,
+                                      confirmButtonColor: '#2563eb'
+                                    });
+                                  }
+                                }}
+                              >
+                                Agendar cita
+                              </button>
+                            </div>
+                          </div>
+
+                          {selectedPatient === patient.id && patientTests.length > 0 && (
+                            <div style={{ marginTop: '1.5rem', paddingTop: '1.5rem', borderTop: '1px solid #dee2e6' }}>
+                              <h4 style={{ marginBottom: '1rem', fontSize: '1rem' }}>
+                                Tests completados: {patientTests.filter(t => t.status === 'completed').length}
+                              </h4>
+                              <div style={{ display: 'grid', gap: '0.5rem' }}>
+                                {patientTests.slice(0, 3).map((test) => (
+                                  <div
+                                    key={test.id}
+                                    style={{
+                                      padding: '0.75rem',
+                                      background: '#f8f9fa',
+                                      borderRadius: '6px',
+                                      fontSize: '0.85rem'
+                                    }}
+                                  >
+                                    <span style={{ fontWeight: 600 }}>
+                                      {new Date(test.created_at).toLocaleDateString()}
+                                    </span>
+                                    {' - '}
+                                    <span style={{ color: test.status === 'completed' ? '#28a745' : '#ffc107' }}>
+                                      {test.status === 'completed' ? 'Completado' : 'En progreso'}
+                                    </span>
+                                    {test.total_score !== null && (
+                                      <span style={{ marginLeft: '1rem', fontWeight: 600 }}>
+                                        Puntaje: {test.total_score}
+                                      </span>
+                                    )}
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
                         </div>
                       </div>
-                    )}
-                  </div>
                     );
-                })
-              )}
-            </div>
+                  })
+                )}
+              </div>
 
+              {/* Panel de perfil detallado */}
               <div className="card" style={{ padding: '1rem' }}>
                 {!selectedProfile ? (
                   <p style={{ color: '#64748b', textAlign: 'center', padding: '2rem 0' }}>
@@ -563,7 +521,6 @@ function PatientsPage({ role, onLogout }) {
                   </p>
                 ) : (
                   <div style={{ display: 'grid', gap: '0.9rem' }}>
-                    {/* Botón para exportar PDF (solo preparación, sin lógica aún) */}
                     <button
                       className="btn-primary"
                       style={{ marginBottom: 10, maxWidth: 220 }}
@@ -621,7 +578,11 @@ function PatientsPage({ role, onLogout }) {
                     <div style={{ borderTop: '1px solid #e2e8f0', marginTop: 6, paddingTop: 10 }}>
                       <h4 style={{ margin: '0 0 8px 0', color: '#0f172a' }}>Administración del paciente</h4>
                       <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                        <button className="btn-ghost" onClick={() => handleDeletePatient(selectedPatient, selectedProfile?.name)} style={{ borderColor: '#ef4444', color: '#b91c1c' }}>
+                        <button
+                          className="btn-ghost"
+                          onClick={() => handleDeletePatient(selectedPatient, selectedProfile?.name)}
+                          style={{ borderColor: '#ef4444', color: '#b91c1c' }}
+                        >
                           Eliminar paciente
                         </button>
                       </div>
@@ -629,6 +590,7 @@ function PatientsPage({ role, onLogout }) {
                   </div>
                 )}
               </div>
+
             </div>
           )}
         </div>
@@ -636,5 +598,5 @@ function PatientsPage({ role, onLogout }) {
     </Shell>
   );
 }
-}
+
 export default PatientsPage;
