@@ -1,4 +1,6 @@
 import { useState, useEffect } from 'react';
+import PieChart from '../components/PieChart';
+import { mean, median, stddev } from '../lib/stats';
 import { Link } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import Shell from '../components/Shell';
@@ -83,12 +85,89 @@ function DashboardPage({ role, onLogout }) {
     }
   };
 
+  const [allTests, setAllTests] = useState([]);
+
+  // Cargar todos los tests para popup global
+  useEffect(() => {
+    (async () => {
+      try {
+        const tests = await testAPI.getAllSessions();
+        setAllTests(tests);
+      } catch (e) {}
+    })();
+  }, []);
+
   const metrics = [
     { label: 'Pacientes activos', value: stats.totalPatients, icon: '👥' },
     { label: 'Evaluaciones esta semana', value: stats.weekTests, icon: '📊' },
     { label: 'Casos de seguimiento', value: stats.followupCases, icon: '🔔' },
-    { label: 'Promedio CES-D', value: stats.avgScore, icon: '📈' },
+    { label: 'Promedio CES-D', value: stats.avgScore, icon: '📈', onClick: handleShowCESDStats },
   ];
+
+  function handleShowCESDStats() {
+    // Filtrar solo tests CES-D completados
+    const cesdTests = allTests.filter(t => t.instrument_code === 'CESD' && t.status === 'completed' && typeof t.total_score === 'number');
+    const scores = cesdTests.map(t => t.total_score);
+    const n = scores.length;
+    const media = mean(scores).toFixed(1);
+    const mediana = median(scores).toFixed(0);
+    const desv = stddev(scores).toFixed(1);
+
+    // Distribución de niveles CES-D
+    let normal = 0, moderado = 0, alto = 0;
+    cesdTests.forEach(t => {
+      if (t.total_score <= 15) normal++;
+      else if (t.total_score <= 23) moderado++;
+      else alto++;
+    });
+    const dist = [normal, moderado, alto];
+    const distPct = dist.map(v => n ? (v * 100 / n).toFixed(1) : '0.0');
+
+    const chartLabels = ['Normal (0-15)', 'Moderado (16-23)', 'Alto (24-60)'];
+    const chartColors = ['#3b82f6', '#fbbf24', '#ef4444'];
+
+    Swal.fire({
+      title: 'Estadísticas globales CES-D',
+      html: `
+        <div style="text-align:left;max-width:420px;margin:0 auto;">
+          <div style='display:flex;gap:18px;justify-content:space-between;margin-bottom:10px;'>
+            <div><b>Media</b><br><span style='color:#2563eb;font-size:1.3em;'>${media}</span></div>
+            <div><b>Mediana</b><br><span style='color:#2563eb;font-size:1.3em;'>${mediana}</span></div>
+            <div><b>Desv. Est.</b><br><span style='color:#2563eb;font-size:1.3em;'>${desv}</span></div>
+            <div><b>n</b><br><span style='color:#2563eb;font-size:1.3em;'>${n}</span></div>
+          </div>
+          <div id='cesd-piechart' style='width:100%;height:180px;margin-bottom:10px;'></div>
+          <ul style='font-size:0.98em;margin-bottom:10px;'>
+            <li style='color:#3b82f6;'><b>Normal (0-15):</b> ${distPct[0]}% (${dist[0]})</li>
+            <li style='color:#fbbf24;'><b>Moderado (16-23):</b> ${distPct[1]}% (${dist[1]})</li>
+            <li style='color:#ef4444;'><b>Alto (24-60):</b> ${distPct[2]}% (${dist[2]})</li>
+          </ul>
+          <div style='background:#fee2e2;color:#b91c1c;padding:8px 12px;border-radius:8px;font-size:0.97em;'>
+            ${distPct[2]}% de los pacientes presentan síntomas depresivos elevados.
+          </div>
+        </div>
+      `,
+      width: 480,
+      showConfirmButton: true,
+      confirmButtonText: 'Cerrar',
+      didOpen: () => {
+        // Renderizar el gráfico de pastel dentro del modal
+        const root = document.getElementById('cesd-piechart');
+        if (root) {
+          const mount = document.createElement('div');
+          root.appendChild(mount);
+          // Renderizar PieChart usando React
+          import('../components/PieChart').then(({ default: PieChart }) => {
+            import('react-dom').then(ReactDOM => {
+              ReactDOM.render(
+                <PieChart data={dist} labels={chartLabels} colors={chartColors} height={180} />, mount
+              );
+            });
+          });
+        }
+      },
+    });
+  }
 
   return (
     <Shell role={role} onLogout={onLogout}>
@@ -126,7 +205,13 @@ function DashboardPage({ role, onLogout }) {
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 16, marginBottom: 28 }}>
             {metrics.map((m) => (
-              <div key={m.label} className="stat-card" style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+              <div
+                key={m.label}
+                className="stat-card"
+                style={{ display: 'flex', alignItems: 'center', gap: 16, cursor: m.onClick ? 'pointer' : 'default' }}
+                onClick={m.onClick}
+                title={m.onClick ? 'Ver detalles globales' : undefined}
+              >
                 <span style={{ fontSize: '1.8rem' }}>{m.icon}</span>
                 <div>
                   <div
