@@ -81,9 +81,15 @@ function TestPage({ role, onLogout }) {
         return;
       }
 
+      // Mostrar el mensaje real del error si existe
+      let errorMsg = error?.message || error?.toString();
+      if (error?.response?.data?.message) {
+        errorMsg = error.response.data.message;
+      }
+
       Swal.fire({
         title: 'Error',
-        text: `No se pudo cargar la evaluación ${instrumentCode === 'CESD' ? 'CES-D' : instrumentCode}. Verifica tu conexión.`,
+        text: `No se pudo cargar la evaluación: ${errorMsg}`,
         icon: 'error',
         confirmButtonColor: '#0066cc'
       });
