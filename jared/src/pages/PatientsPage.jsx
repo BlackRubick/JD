@@ -120,6 +120,7 @@ function PatientsPage({ role, onLogout }) {
   });
 
   useEffect(() => {
+    console.log('[PatientsPage] Montando componente...');
     loadPatients();
   }, []);
 
@@ -131,9 +132,12 @@ function PatientsPage({ role, onLogout }) {
 
   const loadPatients = async () => {
     try {
+      console.log('[PatientsPage] Llamando a userAPI.getAllPatients...');
       const data = await userAPI.getAllPatients();
+      console.log('[PatientsPage] Pacientes recibidos:', data);
       setPatients(data);
     } catch (error) {
+      console.error('[PatientsPage] Error al cargar pacientes:', error);
       Swal.fire({
         title: 'Error',
         text: 'No se pudieron cargar los pacientes',
@@ -402,6 +406,7 @@ function PatientsPage({ role, onLogout }) {
         icon="👥"
       >
         <div style={{ padding: '2rem' }}>
+          {console.log('[PatientsPage] Render pacientes:', patients)}
           {loading ? (
             <div style={{ textAlign: 'center', padding: '3rem' }}>
               <p>Cargando pacientes...</p>
