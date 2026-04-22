@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import PieChart from '../components/PieChart';
 import { mean, median, stddev } from '../lib/stats';
+import * as ReactDOMClient from 'react-dom/client';
 import { Link } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import Shell from '../components/Shell';
@@ -97,12 +98,148 @@ function DashboardPage({ role, onLogout }) {
     })();
   }, []);
 
+
+  // Definición de los 4 tests
+  const testConfigs = [
+    {
+      code: 'CESD',
+      label: 'Promedio CES-D',
+      icon: '📈',
+      color: 'var(--gold)',
+      chartLabels: ['Normal (0-15)', 'Moderado (16-23)', 'Alto (24-60)'],
+      chartColors: ['#3b82f6', '#fbbf24', '#ef4444'],
+      getLevel: score => (score <= 15 ? 0 : score <= 23 ? 1 : 2),
+      levelMsgs: [
+        '',
+        '',
+        'presentan síntomas depresivos elevados.'
+      ],
+      levelDesc: ['Normal', 'Moderado', 'Alto'],
+      levelHighlight: 2,
+    },
+    {
+      code: 'PSS',
+      label: 'Promedio PSS-14',
+      icon: '⚡',
+      color: '#0891b2',
+      chartLabels: ['Bajo (0-14)', 'Moderado (15-28)', 'Alto (29-56)'],
+      chartColors: ['#22c55e', '#fbbf24', '#ef4444'],
+      getLevel: score => (score <= 14 ? 0 : score <= 28 ? 1 : 2),
+      levelMsgs: [
+        '',
+        '',
+        'presentan niveles altos de estrés.'
+      ],
+      levelDesc: ['Bajo', 'Moderado', 'Alto'],
+      levelHighlight: 2,
+    },
+    {
+      code: 'IDARE',
+      label: 'Promedio IDARE',
+      icon: '📝',
+      color: '#f59e42',
+      chartLabels: ['Bajo (0-30)', 'Moderado (31-60)', 'Alto (61-90)'],
+      chartColors: ['#22c55e', '#fbbf24', '#ef4444'],
+      getLevel: score => (score <= 30 ? 0 : score <= 60 ? 1 : 2),
+      levelMsgs: [
+        '',
+        '',
+        'presentan niveles altos de ansiedad.'
+      ],
+      levelDesc: ['Bajo', 'Moderado', 'Alto'],
+      levelHighlight: 2,
+    },
+    {
+      code: 'BSS',
+      label: 'Promedio BSS',
+      icon: '🕊️',
+      color: '#ef4444',
+      chartLabels: ['Bajo (0-4)', 'Moderado (5-9)', 'Alto (10-38)'],
+      chartColors: ['#3b82f6', '#fbbf24', '#ef4444'],
+      getLevel: score => (score <= 4 ? 0 : score <= 9 ? 1 : 2),
+      levelMsgs: [
+        '',
+        '',
+        'presentan ideación suicida alta.'
+      ],
+      levelDesc: ['Bajo', 'Moderado', 'Alto'],
+      levelHighlight: 2,
+    },
+  ];
+
+  // Calcular promedios para cada test
+  const testStats = testConfigs.map(cfg => {
+    const filtered = allTests.filter(t => t.instrument_code === cfg.code && t.status === 'completed' && typeof t.total_score === 'number');
+    const scores = filtered.map(t => t.total_score);
+    return {
+      ...cfg,
+      n: scores.length,
+      mean: mean(scores).toFixed(1),
+      median: median(scores).toFixed(0),
+      std: stddev(scores).toFixed(1),
+      scores,
+      filtered,
+    };
+  });
+
   const metrics = [
     { label: 'Pacientes activos', value: stats.totalPatients, icon: '👥' },
     { label: 'Evaluaciones esta semana', value: stats.weekTests, icon: '📊' },
     { label: 'Casos de seguimiento', value: stats.followupCases, icon: '🔔' },
-    { label: 'Promedio CES-D', value: stats.avgScore, icon: '📈', onClick: handleShowCESDStats },
+    ...testStats.map((t, idx) => ({
+      label: t.label,
+      value: t.mean,
+      icon: t.icon,
+      color: t.color,
+      onClick: () => handleShowTestStats(t),
+    })),
   ];
+
+  function handleShowTestStats(cfg) {
+    const { scores, n, mean, median: mediana, std, chartLabels, chartColors, getLevel, levelMsgs, levelHighlight } = cfg;
+    // Distribución de niveles
+    const dist = [0, 0, 0];
+    scores.forEach(score => {
+      dist[getLevel(score)]++;
+    });
+    const distPct = dist.map(v => n ? (v * 100 / n).toFixed(1) : '0.0');
+
+    Swal.fire({
+      title: `Estadísticas globales ${cfg.label.replace('Promedio ', '')}`,
+      html: `
+        <div style="text-align:left;max-width:420px;margin:0 auto;">
+          <div style='display:flex;gap:18px;justify-content:space-between;margin-bottom:10px;'>
+            <div><b>Media</b><br><span style='color:#2563eb;font-size:1.3em;'>${mean}</span></div>
+            <div><b>Mediana</b><br><span style='color:#2563eb;font-size:1.3em;'>${mediana}</span></div>
+            <div><b>Desv. Est.</b><br><span style='color:#2563eb;font-size:1.3em;'>${std}</span></div>
+            <div><b>n</b><br><span style='color:#2563eb;font-size:1.3em;'>${n}</span></div>
+          </div>
+          <div id='test-piechart' style='width:100%;height:180px;margin-bottom:10px;'></div>
+          <ul style='font-size:0.98em;margin-bottom:10px;'>
+            <li style='color:${chartColors[0]};'><b>${chartLabels[0]}:</b> ${distPct[0]}% (${dist[0]})</li>
+            <li style='color:${chartColors[1]};'><b>${chartLabels[1]}:</b> ${distPct[1]}% (${dist[1]})</li>
+            <li style='color:${chartColors[2]};'><b>${chartLabels[2]}:</b> ${distPct[2]}% (${dist[2]})</li>
+          </ul>
+          <div style='background:#fee2e2;color:#b91c1c;padding:8px 12px;border-radius:8px;font-size:0.97em;'>
+            ${distPct[levelHighlight]}% de los pacientes ${levelMsgs[levelHighlight]}
+          </div>
+        </div>
+      `,
+      width: 480,
+      showConfirmButton: true,
+      confirmButtonText: 'Cerrar',
+      didOpen: () => {
+        // Renderizar el gráfico de pastel dentro del modal usando React 18
+        const root = document.getElementById('test-piechart');
+        if (root) {
+          const mount = document.createElement('div');
+          root.appendChild(mount);
+          const pie = <PieChart data={dist} labels={chartLabels} colors={chartColors} height={180} />;
+          ReactDOMClient.createRoot(mount).render(pie);
+        }
+      },
+    });
+  }
 
   function handleShowCESDStats() {
     // Filtrar solo tests CES-D completados
