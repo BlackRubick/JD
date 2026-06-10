@@ -19,20 +19,20 @@ function ResourcesPage({ role, onLogout }) {
   const patientEmail = localStorage.getItem('psybioneer-email') || '';
 
   const confirmedForPatient = !isTherapist
-    ? appointments.find(a => a.status === 'agendada')
+    ? appointments.find(a => a.status === 'agendada' && a.patientEmail === patientEmail)
     : null;
 
   const hasAnyAppointments = isTherapist && appointments.length > 0;
 
   const handlePatientRequestAppointment = async () => {
     const { value: formValues } = await Swal.fire({
-      title: 'Solicitar cita',
+      title: 'Agendar cita',
       html:
         `<input id="swal-date" type="date" class="swal2-input" style="margin-bottom:8px;" />` +
         `<input id="swal-time" type="time" class="swal2-input" />`,
       focusConfirm: false,
       showCancelButton: true,
-      confirmButtonText: 'Solicitar',
+      confirmButtonText: 'Agendar',
       cancelButtonText: 'Cancelar',
       confirmButtonColor: '#2563eb',
       preConfirm: () => {
@@ -154,28 +154,54 @@ function ResourcesPage({ role, onLogout }) {
       <InnerPage title="Recursos de apoyo" subtitle="Contenido psicoeducativo y rutas de ayuda" icon="">
 
         {/* Banner de estado de citas */}
-        <div
-          onClick={isTherapist ? handleTherapistBannerClick : undefined}
-          style={{
+        {isTherapist ? (
+          <div
+            onClick={handleTherapistBannerClick}
+            style={{
+              marginBottom: 20,
+              padding: '14px 20px',
+              borderRadius: 10,
+              background: hasAnyAppointments ? '#dbeafe' : '#f1f5f9',
+              border: `1px solid ${hasAnyAppointments ? '#93c5fd' : '#e2e8f0'}`,
+              textAlign: 'center',
+              fontWeight: 600,
+              fontSize: '1.05rem',
+              color: hasAnyAppointments ? '#1d4ed8' : '#64748b',
+              cursor: hasAnyAppointments ? 'pointer' : 'default',
+              transition: 'box-shadow 0.15s',
+              ...(hasAnyAppointments ? { boxShadow: '0 1px 4px rgba(37,99,235,0.12)' } : {}),
+            }}
+          >
+            {hasAnyAppointments ? '¡Tienes citas agendadas!' : 'Aun no tienes citas agendadas'}
+          </div>
+        ) : confirmedForPatient ? (
+          <div style={{
             marginBottom: 20,
-            padding: '14px 20px',
+            padding: '18px 24px',
             borderRadius: 10,
-            background: hasAnyAppointments || confirmedForPatient ? '#dbeafe' : '#f1f5f9',
-            border: `1px solid ${hasAnyAppointments || confirmedForPatient ? '#93c5fd' : '#e2e8f0'}`,
+            background: '#dbeafe',
+            border: '1px solid #93c5fd',
             textAlign: 'center',
-            fontWeight: 600,
-            fontSize: '1.05rem',
-            color: hasAnyAppointments || confirmedForPatient ? '#1d4ed8' : '#64748b',
-            cursor: isTherapist && hasAnyAppointments ? 'pointer' : 'default',
-            transition: 'box-shadow 0.15s',
-            ...(isTherapist && hasAnyAppointments ? { boxShadow: '0 1px 4px rgba(37,99,235,0.12)' } : {}),
-          }}
-        >
-          {isTherapist
-            ? (hasAnyAppointments ? '¡Tienes citas agendadas!' : 'Aun no tienes citas agendadas')
-            : (confirmedForPatient ? '¡Tienes una cita agendada!' : null)
-          }
-        </div>
+          }}>
+            <div style={{ fontWeight: 700, fontSize: '1.1rem', color: '#1d4ed8', marginBottom: 10 }}>
+              ¡Tienes una cita agendada!
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'center', gap: 16, flexWrap: 'wrap' }}>
+              <div style={{
+                background: '#fff', border: '1px solid #bfdbfe', borderRadius: 8,
+                padding: '8px 20px', fontSize: '0.98rem', color: '#1e40af', fontWeight: 600
+              }}>
+                📅 {confirmedForPatient.date}
+              </div>
+              <div style={{
+                background: '#fff', border: '1px solid #bfdbfe', borderRadius: 8,
+                padding: '8px 20px', fontSize: '0.98rem', color: '#1e40af', fontWeight: 600
+              }}>
+                🕐 {confirmedForPatient.time}
+              </div>
+            </div>
+          </div>
+        ) : null}
 
         <div style={{ marginBottom: 24, background: '#f1f5f9', borderRadius: 10, padding: 16, border: '1px solid #e2e8f0' }}>
           <h3 style={{ margin: 0, fontSize: '1.1rem', color: 'var(--navy)' }}>Tipos de test aplicados</h3>
@@ -187,7 +213,7 @@ function ResourcesPage({ role, onLogout }) {
           </ul>
         </div>
 
-        {/* Botón Solicitar cita: solo para pacientes */}
+        {/* Botón Agendar cita: solo para pacientes */}
         {!isTherapist && (
           <div style={{ marginBottom: 24 }}>
             <button
@@ -195,7 +221,7 @@ function ResourcesPage({ role, onLogout }) {
               style={{ padding: '12px 28px', fontSize: '1rem' }}
               onClick={handlePatientRequestAppointment}
             >
-              Solicitar cita
+              Agendar cita
             </button>
           </div>
         )}

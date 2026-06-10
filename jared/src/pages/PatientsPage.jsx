@@ -161,7 +161,27 @@ function PatientsPage({ role, onLogout }) {
     try {
       setSavingRecord(true);
       const data = await userAPI.updatePatientClinicalRecord(selectedPatient, recordForm);
-      setSelectedProfile(data.patient);
+      const patient = data.patient;
+      setSelectedProfile(patient);
+      setRecordForm({
+        gender: patient.clinical_record?.gender || '',
+        curp: patient.clinical_record?.curp || '',
+        phone: patient.clinical_record?.phone || '',
+        birthplace: patient.clinical_record?.birthplace || '',
+        nationality: patient.clinical_record?.nationality || '',
+        residence_inegi: patient.clinical_record?.residence_inegi || '',
+        first_name: patient.first_name || '',
+        last_name: patient.last_name || '',
+        second_last_name: patient.second_last_name || '',
+        address_line: patient.clinical_record?.address_line || '',
+        city: patient.clinical_record?.city || '',
+        state: patient.clinical_record?.state || '',
+        postal_code: patient.clinical_record?.postal_code || '',
+        allergies: patient.clinical_record?.allergies || '',
+        chronic_conditions: patient.clinical_record?.chronic_conditions || '',
+        current_medications: patient.clinical_record?.current_medications || '',
+        notes: patient.clinical_record?.notes || '',
+      });
       await Swal.fire({
         icon: 'success',
         title: 'Expediente actualizado',
