@@ -216,7 +216,8 @@ export const userModel = {
     try {
       [users] = await pool.execute(
         `SELECT id, name, email, date_of_birth, sex, patient_status, patient_status_reason,
-                patient_status_changed_at, deleted_at, created_at
+                patient_status_changed_at, deleted_at, created_at,
+                first_name, last_name, second_last_name
          FROM users
          WHERE id = ?`,
         [patientId]
@@ -224,7 +225,8 @@ export const userModel = {
     } catch {
       // Compatibilidad con esquemas antiguos sin columnas de estatus administrativo.
       [users] = await pool.execute(
-        `SELECT id, name, email, date_of_birth, sex, created_at
+        `SELECT id, name, email, date_of_birth, sex, created_at,
+                first_name, last_name, second_last_name
          FROM users
          WHERE id = ?`,
         [patientId]

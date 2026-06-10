@@ -149,7 +149,7 @@ function drawRecord(doc, record, startY) {
     ['CURP', record.curp || ''],
     ['Teléfono', record.phone || ''],
     ['Nacionalidad', record.nationality || ''],
-    ['Lugar de nacimiento', record.birthplace || ''],
+    ['Lugar de nacimiento', record.residence_inegi || record.birthplace || ''],
     ['Municipio/Estado', record.state || ''],
     ['Localidad', record.city || ''],
     ['Código postal', record.postal_code || ''],

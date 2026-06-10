@@ -440,7 +440,7 @@ function PatientsPage({ role, onLogout }) {
                                       `<input id="swal-time" type="time" class="swal2-input" placeholder="Hora" />`,
                                     focusConfirm: false,
                                     showCancelButton: true,
-                                    confirmButtonText: 'Solicitar',
+                                    confirmButtonText: 'Agendar',
                                     preConfirm: () => {
                                       const date = document.getElementById('swal-date').value;
                                       const time = document.getElementById('swal-time').value;
@@ -559,8 +559,7 @@ function PatientsPage({ role, onLogout }) {
                         <input className="input" placeholder="CURP" value={recordForm.curp} onChange={(e) => handleRecordChange('curp', e.target.value)} />
                         <input className="input" placeholder="Telefono" value={recordForm.phone} onChange={(e) => handleRecordChange('phone', e.target.value)} />
                         <input className="input" placeholder="Nacionalidad" value={recordForm.nationality} onChange={(e) => handleRecordChange('nationality', e.target.value)} />
-                        <input className="input" placeholder="Lugar de nacimiento" value={recordForm.birthplace} onChange={(e) => handleRecordChange('birthplace', e.target.value)} />
-                        <input className="input" placeholder="Lugar de residencia (INEGI)" value={recordForm.residence_inegi} onChange={(e) => handleRecordChange('residence_inegi', e.target.value)} />
+                        <input className="input" placeholder="Lugar de nacimiento" value={recordForm.residence_inegi} onChange={(e) => handleRecordChange('residence_inegi', e.target.value)} />
                         <input className="input" placeholder="Codigo postal" value={recordForm.postal_code} onChange={(e) => handleRecordChange('postal_code', e.target.value)} />
                         <input className="input" placeholder="Municipio de residencia" value={recordForm.state} onChange={(e) => handleRecordChange('state', e.target.value)} />
                         <input className="input" placeholder="Localidad/barrio de residencia" value={recordForm.city} onChange={(e) => handleRecordChange('city', e.target.value)} />
@@ -578,6 +577,20 @@ function PatientsPage({ role, onLogout }) {
                     <div style={{ borderTop: '1px solid #e2e8f0', marginTop: 6, paddingTop: 10 }}>
                       <h4 style={{ margin: '0 0 8px 0', color: '#0f172a' }}>Administración del paciente</h4>
                       <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                        <button
+                          className="btn-primary"
+                          onClick={() => updateStatus('active')}
+                          style={{ background: '#16a34a', borderColor: '#16a34a' }}
+                        >
+                          Activar
+                        </button>
+                        <button
+                          className="btn-ghost"
+                          onClick={() => updateStatus('inactive')}
+                          style={{ borderColor: '#94a3b8', color: '#64748b', background: '#f1f5f9' }}
+                        >
+                          Inhabilitar
+                        </button>
                         <button
                           className="btn-ghost"
                           onClick={() => handleDeletePatient(selectedPatient, selectedProfile?.name)}

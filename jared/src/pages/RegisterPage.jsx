@@ -126,8 +126,8 @@ function RegisterPage({ onLogin }) {
             <input className="input" name="nationality" value={formData.nationality} onChange={handleChange} placeholder="Ej. Mexicana" required />
           </div>
           <div>
-            <label style={labelStyle}>Lugar de residencia (clave INEGI)</label>
-            <input className="input" name="residence_inegi" value={formData.residence_inegi} onChange={handleChange} placeholder="Clave INEGI" required />
+            <label style={labelStyle}>Lugar de nacimiento</label>
+            <input className="input" name="residence_inegi" value={formData.residence_inegi} onChange={handleChange} placeholder="Lugar de nacimiento" required />
           </div>
         </div>
         <div>
