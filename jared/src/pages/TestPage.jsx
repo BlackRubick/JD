@@ -99,13 +99,40 @@ function TestPage({ role, onLogout }) {
   };
 
   const handleResponseChange = async (questionId, value) => {
-    setResponses(prev => ({ ...prev, [questionId]: value }));
-    
+    const newResponses = { ...responses, [questionId]: value };
+    setResponses(newResponses);
+
     if (sessionId) {
       try {
         await testAPI.saveResponse(sessionId, questionId, value);
       } catch (error) {
         console.error('Error saving response:', error);
+      }
+    }
+
+    if (activeInstrumentCode === 'BSS' && value >= 1) {
+      const currentQ = questions[currentQuestion];
+      const isCritical =
+        currentQ?.text?.includes('intentar activamente') ||
+        currentQ?.text?.includes('pasivos de suicidio');
+
+      if (isCritical) {
+        try {
+          const totalScore = Object.values(newResponses).reduce((sum, v) => sum + v, 0);
+          await testAPI.completeSession(sessionId, totalScore);
+        } catch {
+          // ignorar error de completado
+        }
+
+        await Swal.fire({
+          title: 'Evaluación finalizada',
+          html: `<p>Con base en tus respuestas la evaluación ha concluido.</p>
+                 <p style="color:#666;margin-top:1rem;">Un especialista revisará tus resultados. Si necesitas apoyo inmediato, comunícate con tu psicólogo.</p>`,
+          icon: 'warning',
+          confirmButtonText: 'Ir a mis tests',
+          confirmButtonColor: '#0066cc',
+        });
+        navigate('/my-tests');
       }
     }
   };
@@ -211,6 +238,23 @@ function TestPage({ role, onLogout }) {
   const progress = ((currentQuestion + 1) / questions.length) * 100;
   const question = questions[currentQuestion];
 
+  const INSTRUMENT_INSTRUCTIONS = {
+    CESD: 'Instrucciones: Indique con qué frecuencia se ha sentido de esta manera durante la última semana, o sea, en los últimos 7 días:',
+    PSS:  'Instrucciones: Indique cómo se ha sentido o cómo ha enfrentado cada situación durante el último mes:',
+    BSS:  'Instrucciones: Escoja la afirmación que mejor describa sus sentimientos o pensamientos durante la última semana, incluyendo el día de hoy.',
+  };
+
+  const getInstruction = () => {
+    if (activeInstrumentCode === 'IDARE') {
+      return currentQuestion < 20
+        ? 'Instrucciones (Preguntas 1–20 · Estado): Lea cada frase e indique cómo se siente ahora mismo, en este preciso momento.'
+        : 'Instrucciones (Preguntas 21–40 · Rasgo): Lea cada frase e indique cómo se siente habitualmente.';
+    }
+    return INSTRUMENT_INSTRUCTIONS[activeInstrumentCode] || null;
+  };
+
+  const instruction = getInstruction();
+
   return (
     <Shell role={role} onLogout={onLogout}>
       <InnerPage 
@@ -257,8 +301,24 @@ function TestPage({ role, onLogout }) {
             </div>
           </div>
 
+          {instruction && (
+            <div style={{
+              marginBottom: '1.5rem',
+              padding: '12px 16px',
+              background: '#f0fdf4',
+              border: '1px solid #bbf7d0',
+              borderRadius: 8,
+              fontSize: '0.88rem',
+              color: '#166534',
+              lineHeight: 1.6,
+              fontStyle: 'italic',
+            }}>
+              {instruction}
+            </div>
+          )}
+
           <div className="card" style={{ padding: isMobile ? '1rem' : '2rem', marginBottom: '2rem' }}>
-            <h3 style={{ 
+            <h3 style={{
               fontSize: isMobile ? '1.05rem' : '1.3rem', 
               marginBottom: '2rem',
               color: '#001f3f',
