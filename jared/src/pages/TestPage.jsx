@@ -238,6 +238,13 @@ function TestPage({ role, onLogout }) {
   const progress = ((currentQuestion + 1) / questions.length) * 100;
   const question = questions[currentQuestion];
 
+  const INSTRUMENT_DESCRIPTIONS = {
+    CESD:  'Escala de depresión del Centro de Estudios Epidemiológicos',
+    PSS:   'Escala de Estrés Percibido',
+    IDARE: 'Inventario de Ansiedad Estado-Rasgo',
+    BSS:   'Escala de Ideación Suicida de Beck',
+  };
+
   const INSTRUMENT_INSTRUCTIONS = {
     CESD: 'Instrucciones: Indique con qué frecuencia se ha sentido de esta manera durante la última semana, o sea, en los últimos 7 días:',
     PSS:  'Instrucciones: Indique cómo se ha sentido o cómo ha enfrentado cada situación durante el último mes:',
@@ -247,8 +254,8 @@ function TestPage({ role, onLogout }) {
   const getInstruction = () => {
     if (activeInstrumentCode === 'IDARE') {
       return currentQuestion < 20
-        ? 'Instrucciones (Preguntas 1–20 · Estado): Lea cada frase e indique cómo se siente ahora mismo, en este preciso momento.'
-        : 'Instrucciones (Preguntas 21–40 · Rasgo): Lea cada frase e indique cómo se siente habitualmente.';
+        ? 'Instrucciones: Lea cada frase e indique cómo se siente ahora mismo, en este preciso momento.'
+        : 'Instrucciones: Lea cada frase e indique cómo se siente habitualmente.';
     }
     return INSTRUMENT_INSTRUCTIONS[activeInstrumentCode] || null;
   };
@@ -257,8 +264,9 @@ function TestPage({ role, onLogout }) {
 
   return (
     <Shell role={role} onLogout={onLogout}>
-      <InnerPage 
-        title={`Evaluación ${instrumentName}`} 
+      <InnerPage
+        title={`Evaluación ${instrumentName}`}
+        description={INSTRUMENT_DESCRIPTIONS[activeInstrumentCode]}
         subtitle={`Pregunta ${currentQuestion + 1} de ${questions.length}`}
         icon="📋"
       >
