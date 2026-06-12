@@ -110,20 +110,17 @@ function TestPage({ role, onLogout }) {
       }
     }
 
-    if (activeInstrumentCode === 'BSS') {
-      const answeredQ = questions.find(q => q.id === questionId);
-      const isQ4orQ5 =
-        answeredQ?.position === 78 ||
-        answeredQ?.position === 79 ||
-        answeredQ?.text?.includes('intentar activamente') ||
-        answeredQ?.text?.includes('pasivos de suicidio');
+    if (activeInstrumentCode === 'BSS' && questions.length >= 5) {
+      const q4 = questions[3];
+      const q5 = questions[4];
+      const isQ4 = String(questionId) === String(q4?.id);
+      const isQ5 = String(questionId) === String(q5?.id);
 
-      if (isQ4orQ5) {
-        const q4 = questions.find(q => q.position === 78 || q.text?.includes('intentar activamente'));
-        const q5 = questions.find(q => q.position === 79 || q.text?.includes('pasivos de suicidio'));
-        const bothZero = q4 && q5 && newResponses[q4.id] === 0 && newResponses[q5.id] === 0;
+      if (isQ4 || isQ5) {
+        const q4val = isQ4 ? value : newResponses[q4?.id];
+        const q5val = isQ5 ? value : newResponses[q5?.id];
 
-        if (bothZero) {
+        if (q4val === 0 && q5val === 0) {
           try {
             const totalScore = Object.values(newResponses).reduce((sum, v) => sum + v, 0);
             await testAPI.completeSession(sessionId, totalScore);
