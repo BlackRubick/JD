@@ -23,7 +23,9 @@ function LoginPage({ role, onLogin }) {
       await Swal.fire({
         icon: 'success',
         title: '¡Bienvenido!',
-        text: selectedRole === 'therapist' ? 'Ingresaste como psicólogo.' : 'Ingresaste como paciente.',
+        text: selectedRole === 'therapist'
+          ? (data.user.email === 'doctor@psybioneer.com' ? 'Ingresaste como admin.' : 'Ingresaste como psicólogo.')
+          : 'Ingresaste como paciente.',
         timer: 1400,
         showConfirmButton: false,
       });
