@@ -29,11 +29,13 @@ function LoginPage({ role, onLogin }) {
       });
       navigate(selectedRole === 'therapist' ? '/dashboard' : '/');
     } catch (error) {
+      const isDisabled = error.message?.includes('inhabilitada');
       await Swal.fire({
-        icon: 'error',
-        title: 'Credenciales inválidas',
+        icon: isDisabled ? 'warning' : 'error',
+        title: isDisabled ? 'Cuenta inhabilitada' : 'Credenciales inválidas',
         text: error.message || 'Verifica tu correo y contraseña.',
         confirmButtonColor: '#2563eb',
+        confirmButtonText: 'Entendido',
       });
     } finally {
       setLoading(false);

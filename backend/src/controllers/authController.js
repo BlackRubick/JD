@@ -100,6 +100,13 @@ export const authController = {
         return res.status(401).json({ error: 'Credenciales inválidas' });
       }
 
+      if (user.role === 'patient' && user.patient_status === 'inactive') {
+        return res.status(403).json({
+          error: 'Tu cuenta ha sido inhabilitada. Contacta a tu psicólogo para recuperar el acceso.',
+          code: 'ACCOUNT_DISABLED'
+        });
+      }
+
       const token = jwt.sign(
         { id: user.id, email: user.email, role: user.role },
         process.env.JWT_SECRET,

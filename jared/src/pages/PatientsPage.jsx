@@ -596,21 +596,30 @@ function PatientsPage({ role, onLogout }) {
 
                     <div style={{ borderTop: '1px solid #e2e8f0', marginTop: 6, paddingTop: 10 }}>
                       <h4 style={{ margin: '0 0 8px 0', color: '#0f172a' }}>Administración del paciente</h4>
+                      {selectedProfile?.patient_status === 'inactive' && (
+                        <div style={{ marginBottom: 10, padding: '8px 12px', background: '#fef3c7', border: '1px solid #f59e0b', borderRadius: 6, fontSize: '0.82rem', color: '#92400e' }}>
+                          Este paciente está inhabilitado. No puede iniciar sesión hasta que lo reactives.
+                        </div>
+                      )}
                       <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                        <button
-                          className="btn-primary"
-                          onClick={() => updateStatus('active')}
-                          style={{ background: '#16a34a', borderColor: '#16a34a' }}
-                        >
-                          Activar
-                        </button>
-                        <button
-                          className="btn-ghost"
-                          onClick={() => updateStatus('inactive')}
-                          style={{ borderColor: '#94a3b8', color: '#64748b', background: '#f1f5f9' }}
-                        >
-                          Inhabilitar
-                        </button>
+                        {selectedProfile?.patient_status !== 'active' && (
+                          <button
+                            className="btn-primary"
+                            onClick={() => updateStatus('active')}
+                            style={{ background: '#16a34a', borderColor: '#16a34a' }}
+                          >
+                            Activar
+                          </button>
+                        )}
+                        {selectedProfile?.patient_status === 'active' && (
+                          <button
+                            className="btn-ghost"
+                            onClick={() => updateStatus('inactive')}
+                            style={{ borderColor: '#94a3b8', color: '#64748b', background: '#f1f5f9' }}
+                          >
+                            Inhabilitar
+                          </button>
+                        )}
                         <button
                           className="btn-ghost"
                           onClick={() => handleDeletePatient(selectedPatient, selectedProfile?.name)}
