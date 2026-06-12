@@ -111,35 +111,30 @@ function TestPage({ role, onLogout }) {
     }
 
     if (activeInstrumentCode === 'BSS') {
-      const q4 = questions.find(q => String(q.position) === '78');
       const q5 = questions.find(q => String(q.position) === '79');
+      const isQ5 = q5 && String(questionId) === String(q5.id) && value === 0;
 
-      if (q4 && q5) {
-        const isQ4 = String(questionId) === String(q4.id);
-        const isQ5 = String(questionId) === String(q5.id);
+      if (isQ5) {
+        const q4 = questions.find(q => String(q.position) === '78');
+        const q4val = q4 ? newResponses[q4.id] : undefined;
 
-        if (isQ4 || isQ5) {
-          const q4val = isQ4 ? value : newResponses[q4.id];
-          const q5val = isQ5 ? value : newResponses[q5.id];
-
-          if (q4val === 0 && q5val === 0) {
-            try {
-              const totalScore = Object.values(newResponses).reduce((sum, v) => sum + v, 0);
-              await testAPI.completeSession(sessionId, totalScore);
-            } catch {
-              // ignorar error de completado
-            }
-
-            await Swal.fire({
-              title: 'Evaluación finalizada',
-              html: `<p>Con base en tus respuestas la evaluación ha concluido.</p>
-                     <p style="color:#666;margin-top:1rem;">Un especialista revisará tus resultados. Si necesitas apoyo inmediato, comunícate con tu psicólogo.</p>`,
-              icon: 'warning',
-              confirmButtonText: 'Ir a mis tests',
-              confirmButtonColor: '#0066cc',
-            });
-            navigate('/my-tests');
+        if (q4val === 0) {
+          try {
+            const totalScore = Object.values(newResponses).reduce((sum, v) => sum + v, 0);
+            await testAPI.completeSession(sessionId, totalScore);
+          } catch {
+            // ignorar error de completado
           }
+
+          await Swal.fire({
+            title: 'Evaluación finalizada',
+            html: `<p>Con base en tus respuestas la evaluación ha concluido.</p>
+                   <p style="color:#666;margin-top:1rem;">Un especialista revisará tus resultados. Si necesitas apoyo inmediato, comunícate con tu psicólogo.</p>`,
+            icon: 'warning',
+            confirmButtonText: 'Ir a mis tests',
+            confirmButtonColor: '#0066cc',
+          });
+          navigate('/my-tests');
         }
       }
     }
