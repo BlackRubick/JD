@@ -110,11 +110,13 @@ function TestPage({ role, onLogout }) {
       }
     }
 
-    if (activeInstrumentCode === 'BSS' && value >= 1) {
-      const currentQ = questions[currentQuestion];
+    if (activeInstrumentCode === 'BSS' && value === 0) {
+      const answeredQ = questions.find(q => q.id === questionId);
       const isCritical =
-        currentQ?.text?.includes('intentar activamente') ||
-        currentQ?.text?.includes('pasivos de suicidio');
+        answeredQ?.position === 78 ||
+        answeredQ?.position === 79 ||
+        answeredQ?.text?.includes('intentar activamente') ||
+        answeredQ?.text?.includes('pasivos de suicidio');
 
       if (isCritical) {
         try {
