@@ -106,7 +106,9 @@ function Shell({ children, role, onLogout }) {
                   background: '#eff6ff', border: '1px solid #bfdbfe',
                   borderRadius: 999, padding: '4px 12px',
                 }}>
-                  {role === 'therapist' ? '🧑‍⚕️ Psicólogo' : '👤 Paciente'}
+                  {role === 'therapist'
+                    ? (window.localStorage.getItem('psybioneer-email') === 'doctor@psybioneer.com' ? '🛡️ Admin' : '🧑‍⚕️ Psicólogo')
+                    : '👤 Paciente'}
                 </span>
                 <button className="btn-ghost" onClick={onLogout} style={{ padding: '8px 16px', fontSize: '0.8rem' }}>
                   Salir
