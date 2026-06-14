@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { exportPatientPDF } from '../utils/exportPatientPDF';
-import { getAppointmentRequests, updateAppointmentRequest, addAppointmentRequest } from '../lib/appointments';
+import { getAppointmentRequests, updateAppointmentRequest, addAppointmentRequest, removeAppointmentRequest, getAppointmentHistory, addAppointmentToHistory } from '../lib/appointments';
 import { Link } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import Shell from '../components/Shell';
@@ -61,18 +61,24 @@ function PatientsPage({ role, onLogout }) {
       : '';
     const sex = selectedProfile.sex || '';
     const tests = patientTests.map(t => ({
-      name: t.test_name || t.name,
+      name: t.instrument_name || t.instrument_code || '',
       date: t.created_at,
       score: t.total_score,
       interpretation: t.interpretation || ''
     }));
+    const allHistory = getAppointmentHistory();
+    const appointmentHistory = allHistory.filter(h =>
+      (h.patientEmail && selectedProfile.email && h.patientEmail === selectedProfile.email) ||
+      (h.patientId && selectedProfile.id && String(h.patientId) === String(selectedProfile.id))
+    );
     return {
       folio,
       age,
       sex,
       tests,
       profile: selectedProfile,
-      record: recordForm
+      record: recordForm,
+      appointmentHistory
     };
   };
 
@@ -294,6 +300,39 @@ function PatientsPage({ role, onLogout }) {
     }
   };
 
+  const handleCompleteAppointment = async (idx, statusResult) => {
+    const appt = appointments[idx];
+    const label = statusResult === 'realizada' ? 'Cita realizada' : 'Cancelar cita';
+    const result = await Swal.fire({
+      title: label,
+      text: statusResult === 'realizada'
+        ? '¿Confirmas que la cita fue realizada? Se guardará en el expediente del paciente.'
+        : '¿Confirmas que deseas cancelar esta cita? Se guardará en el expediente del paciente.',
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonText: 'Confirmar',
+      cancelButtonText: 'Volver',
+      confirmButtonColor: statusResult === 'realizada' ? '#16a34a' : '#dc2626',
+    });
+    if (!result.isConfirmed) return;
+    addAppointmentToHistory({
+      patientEmail: appt.patientEmail || '',
+      patientId: appt.patientId || null,
+      patientName: appt.patientName || appt.patientEmail || '',
+      date: appt.date,
+      time: appt.time,
+      status: statusResult,
+    });
+    removeAppointmentRequest(idx);
+    setAppointments(getAppointmentRequests());
+    await Swal.fire({
+      icon: 'success',
+      title: statusResult === 'realizada' ? 'Cita marcada como realizada' : 'Cita cancelada',
+      timer: 1400,
+      showConfirmButton: false,
+    });
+  };
+
   const handleAcceptAppointment = (idx, keepDate) => {
     if (!keepDate) {
       Swal.fire({
@@ -365,10 +404,28 @@ function PatientsPage({ role, onLogout }) {
                 <div style={{ color: '#64748b', fontSize: '0.97rem' }}>No hay citas agendadas.</div>
               ) : appointments.map((a, idx) => a.status === 'agendada' && (
                 <div key={idx} style={{ border: '1px solid #bbf7d0', borderRadius: 8, padding: 12, background: '#fff' }}>
-                  <div style={{ fontSize: '0.97rem', color: '#166534' }}>
-                    <b>Paciente:</b> {a.patientName || 'Paciente'}<br />
-                    <b>Fecha:</b> {a.date} <b>Hora:</b> {a.time}<br />
-                    <b>Estatus:</b> Agendada
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 10 }}>
+                    <div style={{ fontSize: '0.97rem', color: '#166534' }}>
+                      <b>Paciente:</b> {a.patientName || 'Paciente'}<br />
+                      <b>Fecha:</b> {a.date} &nbsp;<b>Hora:</b> {a.time}<br />
+                      <b>Estatus:</b> Agendada
+                    </div>
+                    <div style={{ display: 'flex', gap: 8 }}>
+                      <button
+                        className="btn-primary"
+                        style={{ fontSize: '0.85rem', background: '#16a34a', borderColor: '#16a34a', whiteSpace: 'nowrap' }}
+                        onClick={() => handleCompleteAppointment(idx, 'realizada')}
+                      >
+                        Cita realizada
+                      </button>
+                      <button
+                        className="btn-ghost"
+                        style={{ fontSize: '0.85rem', borderColor: '#ef4444', color: '#b91c1c', whiteSpace: 'nowrap' }}
+                        onClick={() => handleCompleteAppointment(idx, 'cancelada')}
+                      >
+                        Cancelar cita
+                      </button>
+                    </div>
                   </div>
                 </div>
               ))}
@@ -474,6 +531,7 @@ function PatientsPage({ role, onLogout }) {
                                   if (formValues) {
                                     addAppointmentRequest({
                                       patientName: patient.name,
+                                      patientEmail: patient.email,
                                       patientId: patient.id,
                                       date: formValues.date,
                                       time: formValues.time,

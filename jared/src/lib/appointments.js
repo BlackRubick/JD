@@ -18,3 +18,20 @@ export function updateAppointmentRequest(index, update) {
     localStorage.setItem('appointmentRequests', JSON.stringify(current));
   }
 }
+
+export function removeAppointmentRequest(index) {
+  const current = getAppointmentRequests();
+  current.splice(index, 1);
+  localStorage.setItem('appointmentRequests', JSON.stringify(current));
+}
+
+export function getAppointmentHistory() {
+  const data = localStorage.getItem('appointmentHistory');
+  return data ? JSON.parse(data) : [];
+}
+
+export function addAppointmentToHistory(entry) {
+  const current = getAppointmentHistory();
+  current.push(entry);
+  localStorage.setItem('appointmentHistory', JSON.stringify(current));
+}

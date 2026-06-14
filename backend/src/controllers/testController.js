@@ -187,6 +187,16 @@ export const testController = {
     }
   },
 
+  async getIdareSubscores(req, res) {
+    try {
+      const data = await testModel.getIdareSubscores(req.user.id);
+      res.json(data);
+    } catch (error) {
+      console.error('Error al obtener subscores IDARE:', error);
+      res.status(500).json({ error: 'Error al obtener subscores IDARE' });
+    }
+  },
+
   async addFeedback(req, res) {
     try {
       const { session_id, feedback_text } = req.body;

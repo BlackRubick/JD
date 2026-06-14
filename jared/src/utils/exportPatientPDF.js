@@ -179,7 +179,7 @@ function drawRecord(doc, record, startY) {
 // EXPORT PRINCIPAL
 export function exportPatientPDF(data) {
   const doc = new jsPDF({ unit: 'mm', format: 'a4' });
-  const { folio, age, sex, tests, profile, record } = data;
+  const { folio, age, sex, tests, profile, record, appointmentHistory } = data;
 
   drawHeader(doc, folio);
 
@@ -200,7 +200,7 @@ export function exportPatientPDF(data) {
   y = sectionTitle(doc, 'Expediente clínico', y);
   y = drawRecord(doc, record, y);
 
-  // TABLA
+  // Historial de evaluaciones
   if (tests?.length) {
     if (y > 220) {
       doc.addPage();
@@ -219,6 +219,35 @@ export function exportPatientPDF(data) {
         t.score ?? '—',
         t.interpretation || '—',
       ]),
+    });
+
+    y = doc.lastAutoTable.finalY + 10;
+  }
+
+  // Historial de citas
+  if (appointmentHistory?.length) {
+    if (y > 220) {
+      doc.addPage();
+      drawHeader(doc, folio);
+      y = 52;
+    }
+
+    y = sectionTitle(doc, 'Historial de citas', y);
+
+    autoTable(doc, {
+      startY: y,
+      head: [['Estado', 'Fecha', 'Hora']],
+      body: appointmentHistory.map(h => [
+        h.status === 'realizada' ? 'Realizada' : 'Cancelada',
+        h.date ? new Date(h.date + 'T00:00:00').toLocaleDateString('es-MX') : '—',
+        h.time || '—',
+      ]),
+      headStyles: { fillColor: BRAND.primary },
+      columnStyles: {
+        0: { cellWidth: 40 },
+        1: { cellWidth: 50 },
+        2: { cellWidth: 40 },
+      },
     });
   }
 

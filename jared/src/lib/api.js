@@ -182,5 +182,9 @@ export const testAPI = {
 
   async getPatientStatuses(patient_id) {
     return apiRequest(`/tests/statuses/patient/${patient_id}`);
+  },
+
+  async getIdareSubscores() {
+    return apiRequest('/tests/idare/subscores');
   }
 };

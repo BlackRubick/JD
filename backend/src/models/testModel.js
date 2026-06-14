@@ -94,7 +94,11 @@ export const testModel = {
 
   async getSessionsByPatient(patient_id) {
     const [rows] = await pool.execute(
-      'SELECT * FROM test_sessions WHERE patient_id = ? ORDER BY created_at DESC',
+      `SELECT ts.*,
+        (SELECT f.feedback_text FROM feedback f WHERE f.test_session_id = ts.id ORDER BY f.created_at DESC LIMIT 1) as latest_feedback
+       FROM test_sessions ts
+       WHERE ts.patient_id = ?
+       ORDER BY ts.created_at DESC`,
       [patient_id]
     );
 
@@ -110,6 +114,31 @@ export const testModel = {
 
     const feedbackMap = new Map(feedbackRows.map((row) => [row.test_session_id, Number(row.feedback_count) > 0]));
     return rows.map((row) => this._decryptSession(row, feedbackMap.get(row.id) || false));
+  },
+
+  async getIdareSubscores(doctorId) {
+    const [rows] = await pool.execute(
+      `SELECT
+         ts.id as session_id,
+         ts.patient_id,
+         SUM(CASE WHEN q.position <= 54 THEN tr.response_value ELSE 0 END) as score_estado,
+         SUM(CASE WHEN q.position >= 55 THEN tr.response_value ELSE 0 END) as score_rasgo
+       FROM test_sessions ts
+       JOIN test_responses tr ON tr.test_session_id = ts.id
+       JOIN questions q ON q.id = tr.question_id
+       JOIN users u ON u.id = ts.patient_id
+       WHERE ts.instrument_code = 'IDARE'
+         AND ts.status = 'completed'
+         AND u.linked_doctor_id = ?
+       GROUP BY ts.id, ts.patient_id`,
+      [doctorId]
+    );
+    return rows.map(r => ({
+      session_id: r.session_id,
+      patient_id: r.patient_id,
+      score_estado: Number(r.score_estado) || 0,
+      score_rasgo: Number(r.score_rasgo) || 0,
+    }));
   },
 
   async getSessionById(session_id) {
@@ -281,6 +310,7 @@ export const testModel = {
       business_status_code: businessStatusCode,
       business_status: getStatusLabel(rawStatus, hasFeedback),
       has_feedback: hasFeedback,
+      interpretation: session.latest_feedback ? safeDecrypt(session.latest_feedback) : '',
     };
   }
 };

@@ -87,6 +87,7 @@ function DashboardPage({ role, onLogout }) {
   };
 
   const [allTests, setAllTests] = useState([]);
+  const [idareSubscores, setIdareSubscores] = useState([]);
 
   // Cargar todos los tests para popup global
   useEffect(() => {
@@ -98,8 +99,17 @@ function DashboardPage({ role, onLogout }) {
     })();
   }, []);
 
+  // Cargar subscores IDARE (Estado/Rasgo)
+  useEffect(() => {
+    (async () => {
+      try {
+        const data = await testAPI.getIdareSubscores();
+        setIdareSubscores(data);
+      } catch (e) {}
+    })();
+  }, []);
 
-  // Definición de los 4 tests
+  // Definición de los tests (sin IDARE, que se maneja por separado)
   const testConfigs = [
     {
       code: 'CESD',
@@ -109,12 +119,7 @@ function DashboardPage({ role, onLogout }) {
       chartLabels: ['Normal (0-15)', 'Moderado (16-23)', 'Alto (24-60)'],
       chartColors: ['#3b82f6', '#fbbf24', '#ef4444'],
       getLevel: score => (score <= 15 ? 0 : score <= 23 ? 1 : 2),
-      levelMsgs: [
-        '',
-        '',
-        'presentan síntomas depresivos elevados.'
-      ],
-      levelDesc: ['Normal', 'Moderado', 'Alto'],
+      levelMsgs: ['', '', 'presentan síntomas depresivos elevados.'],
       levelHighlight: 2,
     },
     {
@@ -122,52 +127,26 @@ function DashboardPage({ role, onLogout }) {
       label: 'Promedio PSS-14',
       icon: '⚡',
       color: '#0891b2',
-      chartLabels: ['Bajo (0-14)', 'Moderado (15-28)', 'Alto (29-56)'],
-      chartColors: ['#22c55e', '#fbbf24', '#ef4444'],
-      getLevel: score => (score <= 14 ? 0 : score <= 28 ? 1 : 2),
-      levelMsgs: [
-        '',
-        '',
-        'presentan niveles altos de estrés.'
-      ],
-      levelDesc: ['Bajo', 'Moderado', 'Alto'],
-      levelHighlight: 2,
-    },
-    {
-      code: 'IDARE',
-      label: 'Promedio IDARE',
-      icon: '📝',
-      color: '#f59e42',
-      chartLabels: ['Bajo (0-30)', 'Moderado (31-60)', 'Alto (61-90)'],
-      chartColors: ['#22c55e', '#fbbf24', '#ef4444'],
-      getLevel: score => (score <= 30 ? 0 : score <= 60 ? 1 : 2),
-      levelMsgs: [
-        '',
-        '',
-        'presentan niveles altos de ansiedad.'
-      ],
-      levelDesc: ['Bajo', 'Moderado', 'Alto'],
-      levelHighlight: 2,
+      chartLabels: ['Bajo (0-14)', 'Estrés ocasional (15-28)', 'Estrés frecuente (29-42)', 'Estrés muy frecuente (43-56)'],
+      chartColors: ['#22c55e', '#fbbf24', '#f97316', '#ef4444'],
+      getLevel: score => (score <= 14 ? 0 : score <= 28 ? 1 : score <= 42 ? 2 : 3),
+      levelMsgs: ['', '', '', 'presentan estrés muy frecuente.'],
+      levelHighlight: 3,
     },
     {
       code: 'BSS',
       label: 'Promedio BSS',
       icon: '🕊️',
       color: '#ef4444',
-      chartLabels: ['Bajo (0-4)', 'Moderado (5-9)', 'Alto (10-38)'],
-      chartColors: ['#3b82f6', '#fbbf24', '#ef4444'],
-      getLevel: score => (score <= 4 ? 0 : score <= 9 ? 1 : 2),
-      levelMsgs: [
-        '',
-        '',
-        'presentan ideación suicida alta.'
-      ],
-      levelDesc: ['Bajo', 'Moderado', 'Alto'],
-      levelHighlight: 2,
+      chartLabels: ['Mínimo/Nulo (0-4)', 'Bajo (5-9)', 'Moderado (10-19)', 'Alto (20-38)'],
+      chartColors: ['#3b82f6', '#22c55e', '#fbbf24', '#ef4444'],
+      getLevel: score => (score <= 4 ? 0 : score <= 9 ? 1 : score <= 19 ? 2 : 3),
+      levelMsgs: ['', '', '', 'presentan ideación suicida alta.'],
+      levelHighlight: 3,
     },
   ];
 
-  // Calcular promedios para cada test
+  // Calcular promedios para CES-D, PSS, BSS
   const testStats = testConfigs.map(cfg => {
     const filtered = allTests.filter(t => t.instrument_code === cfg.code && t.status === 'completed' && typeof t.total_score === 'number');
     const scores = filtered.map(t => t.total_score);
@@ -178,31 +157,88 @@ function DashboardPage({ role, onLogout }) {
       median: median(scores).toFixed(0),
       std: stddev(scores).toFixed(1),
       scores,
-      filtered,
     };
   });
+
+  // Calcular estadísticas IDARE por subscala
+  const idareAnsiedadLabels = ['Baja (<30)', 'Media (30-44)', 'Alta (>44)'];
+  const idareAnsiedadColors = ['#22c55e', '#fbbf24', '#ef4444'];
+  const getIdareLevel = score => (score < 30 ? 0 : score <= 44 ? 1 : 2);
+
+  const idareEstadoScores = idareSubscores.map(s => s.score_estado);
+  const idareRasgoScores = idareSubscores.map(s => s.score_rasgo);
+
+  const idareEstadoCfg = {
+    code: 'IDARE-E',
+    label: 'Ansiedad-Estado',
+    icon: '😰',
+    color: '#f59e42',
+    chartLabels: idareAnsiedadLabels,
+    chartColors: idareAnsiedadColors,
+    getLevel: getIdareLevel,
+    levelMsgs: ['', '', 'presentan ansiedad-estado alta.'],
+    levelHighlight: 2,
+    n: idareEstadoScores.length,
+    mean: mean(idareEstadoScores).toFixed(1),
+    median: median(idareEstadoScores).toFixed(0),
+    std: stddev(idareEstadoScores).toFixed(1),
+    scores: idareEstadoScores,
+  };
+
+  const idareRasgoCfg = {
+    code: 'IDARE-R',
+    label: 'Ansiedad-Rasgo',
+    icon: '📝',
+    color: '#d97706',
+    chartLabels: idareAnsiedadLabels,
+    chartColors: idareAnsiedadColors,
+    getLevel: getIdareLevel,
+    levelMsgs: ['', '', 'presentan ansiedad-rasgo alta.'],
+    levelHighlight: 2,
+    n: idareRasgoScores.length,
+    mean: mean(idareRasgoScores).toFixed(1),
+    median: median(idareRasgoScores).toFixed(0),
+    std: stddev(idareRasgoScores).toFixed(1),
+    scores: idareRasgoScores,
+  };
 
   const metrics = [
     { label: 'Pacientes activos', value: stats.totalPatients, icon: '👥' },
     { label: 'Evaluaciones esta semana', value: stats.weekTests, icon: '📊' },
     { label: 'Casos de seguimiento', value: stats.followupCases, icon: '🔔' },
-    ...testStats.map((t, idx) => ({
+    ...testStats.map(t => ({
       label: t.label,
       value: t.mean,
       icon: t.icon,
       color: t.color,
       onClick: () => handleShowTestStats(t),
     })),
+    {
+      label: 'Promedio Ansiedad-Estado',
+      value: idareEstadoCfg.mean,
+      icon: idareEstadoCfg.icon,
+      color: idareEstadoCfg.color,
+      onClick: () => handleShowTestStats(idareEstadoCfg),
+    },
+    {
+      label: 'Promedio Ansiedad-Rasgo',
+      value: idareRasgoCfg.mean,
+      icon: idareRasgoCfg.icon,
+      color: idareRasgoCfg.color,
+      onClick: () => handleShowTestStats(idareRasgoCfg),
+    },
   ];
 
   function handleShowTestStats(cfg) {
     const { scores, n, mean, median: mediana, std, chartLabels, chartColors, getLevel, levelMsgs, levelHighlight } = cfg;
-    // Distribución de niveles
-    const dist = [0, 0, 0];
-    scores.forEach(score => {
-      dist[getLevel(score)]++;
-    });
+    const numLevels = chartLabels.length;
+    const dist = new Array(numLevels).fill(0);
+    scores.forEach(score => { dist[getLevel(score)]++; });
     const distPct = dist.map(v => n ? (v * 100 / n).toFixed(1) : '0.0');
+
+    const listItems = chartLabels.map((label, i) =>
+      `<li style='color:${chartColors[i]};'><b>${label}:</b> ${distPct[i]}% (${dist[i]})</li>`
+    ).join('');
 
     Swal.fire({
       title: `Estadísticas globales ${cfg.label.replace('Promedio ', '')}`,
@@ -215,11 +251,7 @@ function DashboardPage({ role, onLogout }) {
             <div><b>n</b><br><span style='color:#2563eb;font-size:1.3em;'>${n}</span></div>
           </div>
           <div id='test-piechart' style='width:100%;height:180px;margin-bottom:10px;'></div>
-          <ul style='font-size:0.98em;margin-bottom:10px;'>
-            <li style='color:${chartColors[0]};'><b>${chartLabels[0]}:</b> ${distPct[0]}% (${dist[0]})</li>
-            <li style='color:${chartColors[1]};'><b>${chartLabels[1]}:</b> ${distPct[1]}% (${dist[1]})</li>
-            <li style='color:${chartColors[2]};'><b>${chartLabels[2]}:</b> ${distPct[2]}% (${dist[2]})</li>
-          </ul>
+          <ul style='font-size:0.98em;margin-bottom:10px;'>${listItems}</ul>
           <div style='background:#fee2e2;color:#b91c1c;padding:8px 12px;border-radius:8px;font-size:0.97em;'>
             ${distPct[levelHighlight]}% de los pacientes ${levelMsgs[levelHighlight]}
           </div>
@@ -229,7 +261,6 @@ function DashboardPage({ role, onLogout }) {
       showConfirmButton: true,
       confirmButtonText: 'Cerrar',
       didOpen: () => {
-        // Renderizar el gráfico de pastel dentro del modal usando React 18
         const root = document.getElementById('test-piechart');
         if (root) {
           const mount = document.createElement('div');
@@ -241,70 +272,6 @@ function DashboardPage({ role, onLogout }) {
     });
   }
 
-  function handleShowCESDStats() {
-    // Filtrar solo tests CES-D completados
-    const cesdTests = allTests.filter(t => t.instrument_code === 'CESD' && t.status === 'completed' && typeof t.total_score === 'number');
-    const scores = cesdTests.map(t => t.total_score);
-    const n = scores.length;
-    const media = mean(scores).toFixed(1);
-    const mediana = median(scores).toFixed(0);
-    const desv = stddev(scores).toFixed(1);
-
-    // Distribución de niveles CES-D
-    let normal = 0, moderado = 0, alto = 0;
-    cesdTests.forEach(t => {
-      if (t.total_score <= 15) normal++;
-      else if (t.total_score <= 23) moderado++;
-      else alto++;
-    });
-    const dist = [normal, moderado, alto];
-    const distPct = dist.map(v => n ? (v * 100 / n).toFixed(1) : '0.0');
-
-    const chartLabels = ['Normal (0-15)', 'Moderado (16-23)', 'Alto (24-60)'];
-    const chartColors = ['#3b82f6', '#fbbf24', '#ef4444'];
-
-    Swal.fire({
-      title: 'Estadísticas globales CES-D',
-      html: `
-        <div style="text-align:left;max-width:420px;margin:0 auto;">
-          <div style='display:flex;gap:18px;justify-content:space-between;margin-bottom:10px;'>
-            <div><b>Media</b><br><span style='color:#2563eb;font-size:1.3em;'>${media}</span></div>
-            <div><b>Mediana</b><br><span style='color:#2563eb;font-size:1.3em;'>${mediana}</span></div>
-            <div><b>Desv. Est.</b><br><span style='color:#2563eb;font-size:1.3em;'>${desv}</span></div>
-            <div><b>n</b><br><span style='color:#2563eb;font-size:1.3em;'>${n}</span></div>
-          </div>
-          <div id='cesd-piechart' style='width:100%;height:180px;margin-bottom:10px;'></div>
-          <ul style='font-size:0.98em;margin-bottom:10px;'>
-            <li style='color:#3b82f6;'><b>Normal (0-15):</b> ${distPct[0]}% (${dist[0]})</li>
-            <li style='color:#fbbf24;'><b>Moderado (16-23):</b> ${distPct[1]}% (${dist[1]})</li>
-            <li style='color:#ef4444;'><b>Alto (24-60):</b> ${distPct[2]}% (${dist[2]})</li>
-          </ul>
-          <div style='background:#fee2e2;color:#b91c1c;padding:8px 12px;border-radius:8px;font-size:0.97em;'>
-            ${distPct[2]}% de los pacientes presentan síntomas depresivos elevados.
-          </div>
-        </div>
-      `,
-      width: 480,
-      showConfirmButton: true,
-      confirmButtonText: 'Cerrar',
-      didOpen: () => {
-        // Renderizar el gráfico de pastel dentro del modal
-        const root = document.getElementById('cesd-piechart');
-        if (root) {
-          const mount = document.createElement('div');
-          root.appendChild(mount);
-          // Renderizar PieChart usando React
-          import('../components/PieChart').then(({ default: PieChart }) => {
-            import('react-dom').then(ReactDOM => {
-              ReactDOM.render(
-                <PieChart data={dist} labels={chartLabels} colors={chartColors} height={180} />, mount
-              );
-            });
-          });
-        }
-      },
-    });
-  }
 
   return (
     <Shell role={role} onLogout={onLogout}>

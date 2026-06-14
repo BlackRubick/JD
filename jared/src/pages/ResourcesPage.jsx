@@ -19,7 +19,9 @@ function ResourcesPage({ role, onLogout }) {
   const patientEmail = localStorage.getItem('psybioneer-email') || '';
 
   const confirmedForPatient = !isTherapist
-    ? appointments.find(a => a.status === 'agendada' && a.patientEmail === patientEmail)
+    ? [...appointments]
+        .filter(a => a.status === 'agendada' && a.patientEmail === patientEmail)
+        .sort((a, b) => new Date(b.date) - new Date(a.date))[0] || null
     : null;
 
   const hasAnyAppointments = isTherapist && appointments.length > 0;
