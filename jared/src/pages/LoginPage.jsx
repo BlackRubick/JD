@@ -18,13 +18,13 @@ function LoginPage({ role, onLogin }) {
       const data = await authAPI.login({ email, password });
       const selectedRole = data.user.role === 'doctor' ? 'therapist' : 'patient';
       // Guardar email para control de permisos
-      window.localStorage.setItem('psybioneer-email', data.user.email);
+      window.localStorage.setItem('BioPsyTech-email', data.user.email);
       onLogin(selectedRole);
       await Swal.fire({
         icon: 'success',
         title: '¡Bienvenido!',
         text: selectedRole === 'therapist'
-          ? (data.user.email === 'doctor@psybioneer.com' ? 'Ingresaste como admin.' : 'Ingresaste como psicólogo.')
+          ? (data.user.email === 'doctor@BioPsyTech.com' ? 'Ingresaste como admin.' : 'Ingresaste como psicólogo.')
           : 'Ingresaste como paciente.',
         timer: 1400,
         showConfirmButton: false,

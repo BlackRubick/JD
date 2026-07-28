@@ -1,7 +1,7 @@
 {
   "name": "psybioneer-backend",
   "version": "1.0.0",
-  "description": "Backend API for Psybioneer mental health platform",
+  "description": "Backend API for psybioneer mental health platform",
   "main": "src/server.js",
   "type": "module",
   "scripts": {

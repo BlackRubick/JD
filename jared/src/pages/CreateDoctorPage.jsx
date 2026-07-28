@@ -14,7 +14,7 @@ function CreateDoctorPage({ role, onLogout }) {
   const [loading, setLoading] = useState(false);
 
   // Solo permitir acceso si es la cuenta principal
-  if (window.localStorage.getItem('psybioneer-email') !== 'doctor@psybioneer.com') {
+  if (window.localStorage.getItem('BioPsyTech-email') !== 'doctor@BioPsyTech.com') {
     return (
       <Shell role={role} onLogout={onLogout}>
         <InnerPage title="Acceso restringido" subtitle="Solo el psicólogo principal puede crear psicólogos." icon="🔒">
@@ -136,7 +136,7 @@ function CreateDoctorPage({ role, onLogout }) {
                   name="email"
                   value={formData.email}
                   onChange={handleChange}
-                  placeholder="psicologo@psybioneer.com"
+                  placeholder="psicologo@BioPsyTech.com"
                   required
                   style={{
                     padding: '0.75rem',

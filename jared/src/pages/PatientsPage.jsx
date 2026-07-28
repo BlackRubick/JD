@@ -9,7 +9,7 @@ import { userAPI, testAPI } from '../lib/api';
 
 function PatientsPage({ role, onLogout }) {
   const getPsychologistLetter = () => {
-    const email = localStorage.getItem('psybioneer-email') || '';
+    const email = localStorage.getItem('BioPsyTech-email') || '';
     const code = email ? email.charCodeAt(0) - 97 : 0;
     const letter = String.fromCharCode(65 + ((code >= 0 && code < 26) ? code : 0));
     return letter;

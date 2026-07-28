@@ -1,4 +1,4 @@
-const QUESTIONS_KEY = 'psybioneer-questions';
+const QUESTIONS_KEY = 'BioPsyTech-questions';
 
 const DEFAULT_QUESTIONS = [
   { id: 1, text: 'Me molestaron cosas que usualmente no me molestan' },

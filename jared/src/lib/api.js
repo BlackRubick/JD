@@ -1,6 +1,6 @@
 const API_URL = process.env.REACT_APP_API_URL || '/api';
 
-const getToken = () => localStorage.getItem('psybioneer-token');
+const getToken = () => localStorage.getItem('BioPsyTech-token');
 
 const apiRequest = async (endpoint, options = {}) => {
   const token = getToken();
@@ -34,7 +34,7 @@ export const authAPI = {
       body: JSON.stringify(userData),
     });
     if (data.token) {
-      localStorage.setItem('psybioneer-token', data.token);
+      localStorage.setItem('BioPsyTech-token', data.token);
     }
     return data;
   },
@@ -45,7 +45,7 @@ export const authAPI = {
       body: JSON.stringify(credentials),
     });
     if (data.token) {
-      localStorage.setItem('psybioneer-token', data.token);
+      localStorage.setItem('BioPsyTech-token', data.token);
     }
     return data;
   },
@@ -55,8 +55,8 @@ export const authAPI = {
   },
 
   logout() {
-    localStorage.removeItem('psybioneer-token');
-    localStorage.removeItem('psybioneer-role');
+    localStorage.removeItem('BioPsyTech-token');
+    localStorage.removeItem('BioPsyTech-role');
   }
 };
 

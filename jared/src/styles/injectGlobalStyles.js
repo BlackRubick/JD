@@ -1,5 +1,5 @@
-const FONT_LINK_ID = 'psybioneer-font-link';
-const STYLE_TAG_ID = 'psybioneer-global-style';
+const FONT_LINK_ID = 'BioPsyTech-font-link';
+const STYLE_TAG_ID = 'BioPsyTech-global-style';
 
 export function injectGlobalStyles() {
   if (!document.getElementById(FONT_LINK_ID)) {

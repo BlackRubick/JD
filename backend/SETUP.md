@@ -1,4 +1,4 @@
-# 🚀 Guía de Instalación - Psybioneer Backend
+# 🚀 Guía de Instalación - psybioneer Backend
 
 ## 📋 Requisitos Previos
 
@@ -116,7 +116,7 @@ http://localhost:5000
 
 Deberías ver:
 ```json
-{"message": "Psybioneer API está corriendo"}
+{"message": "psybioneer API está corriendo"}
 ```
 
 ## 🧪 Probar el Login

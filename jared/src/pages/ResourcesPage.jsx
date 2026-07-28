@@ -16,7 +16,7 @@ function ResourcesPage({ role, onLogout }) {
   }, []);
 
   const isTherapist = role === 'therapist' || role === 'doctor';
-  const patientEmail = localStorage.getItem('psybioneer-email') || '';
+  const patientEmail = localStorage.getItem('BioPsyTech-email') || '';
 
   const confirmedForPatient = !isTherapist
     ? [...appointments]

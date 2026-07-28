@@ -1,6 +1,6 @@
-# Psybioneer Backend API
+# psybioneer Backend API
 
-Backend API para la plataforma Psybioneer de salud mental.
+Backend API para la plataforma psybioneer de salud mental.
 
 ## Requisitos
 

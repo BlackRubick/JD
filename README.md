@@ -1,4 +1,4 @@
-# 🧠 Psybioneer - Plataforma de Evaluación de Salud Mental
+# 🧠 BioPsyTech - Plataforma de Evaluación de Salud Mental
 
 Sistema completo de evaluación psicológica con backend Node.js + MySQL y frontend React.
 
@@ -41,8 +41,8 @@ PORT=5000
 DB_HOST=localhost
 DB_USER=root
 DB_PASSWORD=tu_contraseña
-DB_NAME=psybioneer
-JWT_SECRET=psybioneer_secret_key_2026
+DB_NAME=BioPsyTech
+JWT_SECRET=BioPsyTech_secret_key_2026
 ```
 
 Iniciar servidor:
@@ -63,7 +63,7 @@ El frontend correrá en `http://localhost:3000`
 ## 👥 Cuentas de Prueba
 
 ### Doctor
-- Email: `doctor@psybioneer.com`
+- Email: `doctor@BioPsyTech.com`
 - Password: `doctor123`
 
 ### Paciente

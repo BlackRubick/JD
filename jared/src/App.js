@@ -6,7 +6,7 @@ import { injectGlobalStyles } from './styles/injectGlobalStyles';
 import { authAPI } from './lib/api';
 
 function App() {
-  const [role, setRole] = useState(() => localStorage.getItem('psybioneer-role'));
+  const [role, setRole] = useState(() => localStorage.getItem('BioPsyTech-role'));
 
   useEffect(() => {
     injectGlobalStyles();
@@ -38,7 +38,7 @@ function App() {
   };
 
   useEffect(() => {
-    role ? localStorage.setItem('psybioneer-role', role) : localStorage.removeItem('psybioneer-role');
+    role ? localStorage.setItem('BioPsyTech-role', role) : localStorage.removeItem('BioPsyTech-role');
   }, [role]);
 
   return (

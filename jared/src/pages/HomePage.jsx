@@ -167,7 +167,7 @@ En conjunto, los instrumentos utilizados presentan:<br>
           <p className="fade-up fade-up-2" style={{
             fontSize: '1.05rem', color: 'var(--muted)', lineHeight: 1.7, marginBottom: 36,
           }}>
-            Psybioneer es una herramienta de tamizaje temprano diseñada para identificar posibles
+            BioPsyTech es una herramienta de tamizaje temprano diseñada para identificar posibles
             indicadores de malestar emocional en estudiantes universitarios.
           </p>
           <div className="fade-up fade-up-3" style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
@@ -226,7 +226,7 @@ En conjunto, los instrumentos utilizados presentan:<br>
                   Información importante
                 </h3>
                 <p style={{ fontSize: '0.88rem', color: 'var(--muted)', lineHeight: 1.75 }}>
-                  Psybioneer es una herramienta digital de tamizaje diseñada para identificar de manera temprana
+                  BioPsyTech es una herramienta digital de tamizaje diseñada para identificar de manera temprana
                   posibles indicadores de malestar emocional en población universitaria.
                 </p>
                 <ul style={{ marginTop: 14, paddingLeft: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 8 }}>
@@ -348,7 +348,7 @@ En conjunto, los instrumentos utilizados presentan:<br>
         padding: '28px 24px',
         textAlign: 'center',
       }}>
-        <p className="serif" style={{ fontSize: '1.1rem', color: '#93c5fd', fontWeight: 700, marginBottom: 6 }}>PSYBIONEER</p>
+        <p className="serif" style={{ fontSize: '1.1rem', color: '#93c5fd', fontWeight: 700, marginBottom: 6 }}>BIOPSYTECH</p>
         <p style={{ fontSize: '0.75rem', color: '#475569' }}>
           © 2025 · Herramienta de tamizaje en salud mental · Todos los derechos reservados
         </p>

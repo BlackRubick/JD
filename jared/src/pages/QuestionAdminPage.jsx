@@ -84,7 +84,7 @@ function QuestionAdminPage({ role, onLogout }) {
   }, [selectedInstrument]);
 
   // Solo permitir acceso si es la cuenta principal
-  if (window.localStorage.getItem('psybioneer-email') !== 'doctor@psybioneer.com') {
+  if (window.localStorage.getItem('BioPsyTech-email') !== 'doctor@BioPsyTech.com') {
     return (
       <Shell role={role} onLogout={onLogout}>
         <InnerPage title="Acceso restringido" subtitle="Solo el psicólogo principal puede editar preguntas." icon="🔒">

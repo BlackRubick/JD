@@ -57,7 +57,7 @@ function Shell({ children, role, onLogout }) {
               <span style={{ color: '#fff', fontSize: 16, fontWeight: 800 }}>Ψ</span>
             </div>
             <span className="serif" style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--navy)', letterSpacing: '-0.01em' }}>
-              PSYBIONEER
+              BIOPSYTECH
             </span>
           </Link>
 
@@ -82,7 +82,7 @@ function Shell({ children, role, onLogout }) {
               <>
                 <Link to="/dashboard" className="nav-link">Dashboard</Link>
                 <Link to="/patients" className="nav-link">Pacientes</Link>
-                {window.localStorage.getItem('psybioneer-email') === 'doctor@psybioneer.com' && (
+                {window.localStorage.getItem('BioPsyTech-email') === 'doctor@BioPsyTech.com' && (
                   <>
                     <Link to="/admin/questions" className="nav-link">⚙️ Preguntas</Link>
                     <Link to="/admin/create-doctor" className="nav-link">🧑‍⚕️ Crear Psicólogo</Link>
@@ -107,7 +107,7 @@ function Shell({ children, role, onLogout }) {
                   borderRadius: 999, padding: '4px 12px',
                 }}>
                   {role === 'therapist'
-                    ? (window.localStorage.getItem('psybioneer-email') === 'doctor@psybioneer.com' ? '🛡️ Admin' : '🧑‍⚕️ Psicólogo')
+                    ? (window.localStorage.getItem('BioPsyTech-email') === 'doctor@BioPsyTech.com' ? '🛡️ Admin' : '🧑‍⚕️ Psicólogo')
                     : '👤 Paciente'}
                 </span>
                 <button className="btn-ghost" onClick={onLogout} style={{ padding: '8px 16px', fontSize: '0.8rem' }}>
@@ -142,7 +142,7 @@ function Shell({ children, role, onLogout }) {
         color: '#dbeafe',
       }}>
         <div style={{ maxWidth: 1200, margin: '0 auto', padding: '26px 24px' }}>
-          <h4 className="serif" style={{ margin: 0, fontSize: '1.1rem', color: '#ffffff' }}>Psybioneer</h4>
+          <h4 className="serif" style={{ margin: 0, fontSize: '1.1rem', color: '#ffffff' }}>BioPsyTech</h4>
           <p style={{ margin: '6px 0 14px 0', fontSize: '0.9rem', color: '#bfdbfe' }}>
             Plataforma digital de evaluación preliminar de bienestar psicológico
           </p>

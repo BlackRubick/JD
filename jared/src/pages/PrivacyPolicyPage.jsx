@@ -7,7 +7,7 @@ function PrivacyPolicyPage({ role, onLogout }) {
         <div style={{ maxWidth: 960, margin: '0 auto' }}>
           <div style={{ marginBottom: 28 }}>
             <h2 className="serif" style={{ fontSize: '2rem', fontWeight: 700, color: '#e2eaf8' }}>Aviso de privacidad</h2>
-            <p style={{ color: '#bfdbfe', marginTop: 10 }}>Plataforma Psybioneer</p>
+            <p style={{ color: '#bfdbfe', marginTop: 10 }}>Plataforma BioPsyTech</p>
             <div style={{ width: 56, height: 3, background: 'linear-gradient(90deg, var(--gold), var(--accent))', borderRadius: 2, marginTop: 10 }} />
           </div>
 
@@ -19,7 +19,7 @@ function PrivacyPolicyPage({ role, onLogout }) {
 
             <h3 className="serif" style={{ marginTop: 20, color: 'var(--navy)' }}>1. Propósito de la plataforma</h3>
             <p>
-              Psybioneer es una plataforma digital diseñada para realizar evaluaciones preliminares de bienestar psicológico
+              BioPsyTech es una plataforma digital diseñada para realizar evaluaciones preliminares de bienestar psicológico
               mediante cuestionarios estandarizados utilizados en investigación académica.
             </p>
             <p>

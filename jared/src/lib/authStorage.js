@@ -1,8 +1,8 @@
-export const USERS_KEY = 'psybioneer-users';
+export const USERS_KEY = 'BioPsyTech-users';
 
 const DEFAULT_USERS = [
   { email: 'prueba@hotmail.com', password: 'prueba123', role: 'patient' },
-  { email: 'doctor@psybioneer.com', password: 'doctor123', role: 'therapist' }
+  { email: 'doctor@BioPsyTech.com', password: 'doctor123', role: 'therapist' }
 ];
 
 export function getStoredUsers() {
