@@ -18,6 +18,7 @@ function DashboardPage({ role, onLogout }) {
   const [doctorCode, setDoctorCode] = useState('');
   const [loading, setLoading] = useState(true);
   const [showCopyFallback, setShowCopyFallback] = useState(false);
+  const [sexData, setSexData] = useState({ femenino: 0, masculino: 0, otro: 0, sinDato: 0 });
 
   useEffect(() => {
     loadDashboardData();
@@ -41,6 +42,16 @@ function DashboardPage({ role, onLogout }) {
         ? (scoresWithValues.reduce((sum, t) => sum + t.total_score, 0) / scoresWithValues.length).toFixed(1)
         : 0;
       const activePatients = patients.filter((p) => (p.patient_status || 'active') === 'active');
+
+      const sexCount = { femenino: 0, masculino: 0, otro: 0, sinDato: 0 };
+      activePatients.forEach(p => {
+        const s = (p.sex || '').toLowerCase();
+        if (s === 'femenino') sexCount.femenino++;
+        else if (s === 'masculino') sexCount.masculino++;
+        else if (s === 'otro' || s === 'prefiero-no-decir') sexCount.otro++;
+        else sexCount.sinDato++;
+      });
+      setSexData(sexCount);
 
       setStats({
         totalPatients: activePatients.length,
@@ -335,6 +346,50 @@ function DashboardPage({ role, onLogout }) {
               </div>
             ))}
           </div>
+          <div className="card" style={{ padding: '36px', marginBottom: 24 }}>
+            <h3 className="serif" style={{ fontSize: '1.3rem', fontWeight: 700, color: 'var(--navy)', marginBottom: 20 }}>
+              Distribución por sexo
+            </h3>
+            {(sexData.femenino + sexData.masculino + sexData.otro + sexData.sinDato) === 0 ? (
+              <p style={{ color: 'var(--muted)', fontSize: '0.9rem' }}>No hay pacientes registrados aún</p>
+            ) : (
+              <div style={{ display: 'flex', alignItems: 'center', gap: 40, flexWrap: 'wrap' }}>
+                <div style={{ width: 220, height: 220, flexShrink: 0 }}>
+                  <PieChart
+                    data={[sexData.femenino, sexData.masculino, sexData.otro, sexData.sinDato].filter((_, i) =>
+                      [sexData.femenino, sexData.masculino, sexData.otro, sexData.sinDato][i] > 0
+                    )}
+                    labels={['Femenino', 'Masculino', 'Otro / No especifica', 'Sin dato'].filter((_, i) =>
+                      [sexData.femenino, sexData.masculino, sexData.otro, sexData.sinDato][i] > 0
+                    )}
+                    colors={['#ec4899', '#3b82f6', '#a855f7', '#94a3b8'].filter((_, i) =>
+                      [sexData.femenino, sexData.masculino, sexData.otro, sexData.sinDato][i] > 0
+                    )}
+                    height={220}
+                  />
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                  {[
+                    { label: 'Femenino', value: sexData.femenino, color: '#ec4899' },
+                    { label: 'Masculino', value: sexData.masculino, color: '#3b82f6' },
+                    { label: 'Otro / No especifica', value: sexData.otro, color: '#a855f7' },
+                    { label: 'Sin dato', value: sexData.sinDato, color: '#94a3b8' },
+                  ].filter(item => item.value > 0).map(item => {
+                    const total = sexData.femenino + sexData.masculino + sexData.otro + sexData.sinDato;
+                    return (
+                      <div key={item.label} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                        <div style={{ width: 14, height: 14, borderRadius: '50%', background: item.color, flexShrink: 0 }} />
+                        <span style={{ color: '#0f172a', fontWeight: 600, fontSize: '0.95rem' }}>{item.label}:</span>
+                        <span style={{ color: item.color, fontWeight: 700, fontSize: '1.05rem' }}>{item.value}</span>
+                        <span style={{ color: '#64748b', fontSize: '0.85rem' }}>({((item.value / total) * 100).toFixed(1)}%)</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+          </div>
+
           <div className="card" style={{ padding: '36px' }}>
             <h3 className="serif" style={{ fontSize: '1.3rem', fontWeight: 700, color: 'var(--navy)', marginBottom: 12 }}>
               Tests recientes
