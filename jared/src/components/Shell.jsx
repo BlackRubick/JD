@@ -71,18 +71,18 @@ function Shell({ children, role, onLogout }) {
             paddingBottom: isMobile ? 4 : 0,
           }}>
             <Link to="/" className="nav-link">Inicio</Link>
-            {role !== 'therapist' && (
+            {role !== 'therapist' && role !== 'admin' && (
               <Link to="/test" className="nav-link">Evaluación</Link>
             )}
             {role === 'patient' && (
               <Link to="/my-tests" className="nav-link">Mis Tests</Link>
             )}
             <Link to="/resources" className="nav-link">Recursos</Link>
-            {role === 'therapist' && (
+            {(role === 'therapist' || role === 'admin') && (
               <>
                 <Link to="/dashboard" className="nav-link">Dashboard</Link>
                 <Link to="/patients" className="nav-link">Pacientes</Link>
-                {window.localStorage.getItem('BioPsyTech-email') === 'doctor@BioPsyTech.com' && (
+                {role === 'admin' && (
                   <>
                     <Link to="/admin/questions" className="nav-link">⚙️ Preguntas</Link>
                     <Link to="/admin/create-doctor" className="nav-link">🧑‍⚕️ Crear Psicólogo</Link>
@@ -106,8 +106,10 @@ function Shell({ children, role, onLogout }) {
                   background: '#eff6ff', border: '1px solid #bfdbfe',
                   borderRadius: 999, padding: '4px 12px',
                 }}>
-                  {role === 'therapist'
-                    ? (window.localStorage.getItem('BioPsyTech-email') === 'doctor@BioPsyTech.com' ? '🛡️ Admin' : '🧑‍⚕️ Psicólogo')
+                  {role === 'admin'
+                    ? '🛡️ Admin'
+                    : role === 'therapist'
+                    ? '🧑‍⚕️ Psicólogo'
                     : '👤 Paciente'}
                 </span>
                 <button className="btn-ghost" onClick={onLogout} style={{ padding: '8px 16px', fontSize: '0.8rem' }}>

@@ -3,7 +3,7 @@ import { Navigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
 
 export function TherapistRoute({ role, children }) {
-  return role === 'therapist' ? children : <Navigate to="/" replace />;
+  return role === 'therapist' || role === 'admin' ? children : <Navigate to="/" replace />;
 }
 
 export function PatientRoute({ role, children }) {

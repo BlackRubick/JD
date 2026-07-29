@@ -16,20 +16,20 @@ function LoginPage({ role, onLogin }) {
 
     try {
       const data = await authAPI.login({ email, password });
-      const selectedRole = data.user.role === 'doctor' ? 'therapist' : 'patient';
-      // Guardar email para control de permisos
-      window.localStorage.setItem('BioPsyTech-email', data.user.email);
+      const selectedRole = data.user.role === 'admin' ? 'admin' : data.user.role === 'doctor' ? 'therapist' : 'patient';
       onLogin(selectedRole);
       await Swal.fire({
         icon: 'success',
         title: '¡Bienvenido!',
-        text: selectedRole === 'therapist'
-          ? (data.user.email === 'doctor@BioPsyTech.com' ? 'Ingresaste como admin.' : 'Ingresaste como psicólogo.')
+        text: selectedRole === 'admin'
+          ? 'Ingresaste como administrador.'
+          : selectedRole === 'therapist'
+          ? 'Ingresaste como psicólogo.'
           : 'Ingresaste como paciente.',
         timer: 1400,
         showConfirmButton: false,
       });
-      navigate(selectedRole === 'therapist' ? '/dashboard' : '/');
+      navigate(selectedRole === 'patient' ? '/' : '/dashboard');
     } catch (error) {
       const isDisabled = error.message?.includes('inhabilitada');
       await Swal.fire({
@@ -44,7 +44,7 @@ function LoginPage({ role, onLogin }) {
     }
   };
 
-  if (role === 'therapist') return <Navigate to="/dashboard" replace />;
+  if (role === 'therapist' || role === 'admin') return <Navigate to="/dashboard" replace />;
 
   return (
     <AuthCard title="Iniciar sesión" subtitle="Accede con tus credenciales institucionales">

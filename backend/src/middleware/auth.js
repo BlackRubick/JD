@@ -17,8 +17,15 @@ export const authMiddleware = async (req, res, next) => {
 };
 
 export const doctorOnly = (req, res, next) => {
-  if (req.user.role !== 'doctor') {
+  if (req.user.role !== 'doctor' && req.user.role !== 'admin') {
     return res.status(403).json({ error: 'Acceso denegado. Solo doctores.' });
+  }
+  next();
+};
+
+export const adminOnly = (req, res, next) => {
+  if (req.user.role !== 'admin') {
+    return res.status(403).json({ error: 'Acceso denegado. Solo administradores.' });
   }
   next();
 };
