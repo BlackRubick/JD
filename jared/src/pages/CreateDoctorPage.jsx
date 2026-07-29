@@ -13,11 +13,10 @@ function CreateDoctorPage({ role, onLogout }) {
   });
   const [loading, setLoading] = useState(false);
 
-  // Solo permitir acceso si es la cuenta principal
-  if (window.localStorage.getItem('BioPsyTech-email') !== 'doctor@BioPsyTech.com') {
+  if (role !== 'admin') {
     return (
       <Shell role={role} onLogout={onLogout}>
-        <InnerPage title="Acceso restringido" subtitle="Solo el psicólogo principal puede crear psicólogos." icon="🔒">
+        <InnerPage title="Acceso restringido" subtitle="Solo el administrador puede crear psicólogos." icon="🔒">
           <div style={{ padding: '2rem', textAlign: 'center', color: '#ef4444', fontWeight: 600 }}>
             No tienes permiso para acceder a esta sección.
           </div>

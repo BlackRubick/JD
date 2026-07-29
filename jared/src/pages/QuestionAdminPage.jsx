@@ -71,31 +71,6 @@ function QuestionAdminPage({ role, onLogout }) {
   const [newOptions, setNewOptions] = useState(cloneTemplate(DEFAULT_TEMPLATE_BY_INSTRUMENT.CESD));
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    loadQuestions();
-    // eslint-disable-next-line
-  }, [selectedInstrument]);
-
-  useEffect(() => {
-    const templateKey = DEFAULT_TEMPLATE_BY_INSTRUMENT[selectedInstrument] || 'CESD_4';
-    setSelectedTemplate(templateKey);
-    setNewOptions(cloneTemplate(templateKey));
-    // eslint-disable-next-line
-  }, [selectedInstrument]);
-
-  // Solo permitir acceso si es la cuenta principal
-  if (window.localStorage.getItem('BioPsyTech-email') !== 'doctor@BioPsyTech.com') {
-    return (
-      <Shell role={role} onLogout={onLogout}>
-        <InnerPage title="Acceso restringido" subtitle="Solo el psicólogo principal puede editar preguntas." icon="🔒">
-          <div style={{ padding: '2rem', textAlign: 'center', color: '#ef4444', fontWeight: 600 }}>
-            No tienes permiso para acceder a esta sección.
-          </div>
-        </InnerPage>
-      </Shell>
-    );
-  }
-
   const loadQuestions = async () => {
     try {
       const loaded = await questionAPI.getAll(selectedInstrument);
@@ -111,6 +86,30 @@ function QuestionAdminPage({ role, onLogout }) {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    loadQuestions();
+    // eslint-disable-next-line
+  }, [selectedInstrument]);
+
+  useEffect(() => {
+    const templateKey = DEFAULT_TEMPLATE_BY_INSTRUMENT[selectedInstrument] || 'CESD_4';
+    setSelectedTemplate(templateKey);
+    setNewOptions(cloneTemplate(templateKey));
+    // eslint-disable-next-line
+  }, [selectedInstrument]);
+
+  if (role !== 'admin') {
+    return (
+      <Shell role={role} onLogout={onLogout}>
+        <InnerPage title="Acceso restringido" subtitle="Solo el administrador puede editar preguntas." icon="🔒">
+          <div style={{ padding: '2rem', textAlign: 'center', color: '#ef4444', fontWeight: 600 }}>
+            No tienes permiso para acceder a esta sección.
+          </div>
+        </InnerPage>
+      </Shell>
+    );
+  }
 
   const handleAdd = async () => {
     if (!newQuestionText.trim()) {
